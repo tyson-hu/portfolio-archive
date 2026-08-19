@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
         '.wrangler/**',
         '.pnpm-store/**',
         '.playwright-mcp/**',
+        '.superpowers/**',
         'next-env.d.ts',
     ]),
 ])

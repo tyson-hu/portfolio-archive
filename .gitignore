@@ -20,6 +20,7 @@
 /.pnpm-store/
 /.playwright-mcp/
 /study-home-desktop.png
+/.superpowers/
 
 # debug
 npm-debug.log*

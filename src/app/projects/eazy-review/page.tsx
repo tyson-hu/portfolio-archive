@@ -285,7 +285,7 @@ function SectionHeading({
 
 export default function EazyReviewProofPage() {
   return (
-    <main className="flex min-h-dvh flex-col gap-20 pb-8">
+    <main className="case-study-page mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-20 px-6 py-12 pb-20 sm:py-24">
       <header className="space-y-8">
         <Link
           href="/"
