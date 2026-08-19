@@ -1295,6 +1295,10 @@
   color: #bac3be;
 }
 
+.project-card--flagship .project-card__links--hierarchical .project-card__link--subordinate:hover {
+  color: var(--project-card-accent-text);
+}
+
 .project-card__visual {
   min-width: 0;
   overflow: hidden;

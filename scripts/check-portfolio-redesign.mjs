@@ -416,6 +416,11 @@ const checks = {
         ) &&
         ruleContains(
           "src/app/portfolio.css",
+          ".project-card--flagship .project-card__links--hierarchical .project-card__link--subordinate:hover",
+          "color: var(--project-card-accent-text)",
+        ) &&
+        ruleContains(
+          "src/app/portfolio.css",
           ".project-card--embedded h3 a:hover",
           "color: var(--project-card-accent-text)",
         ),
