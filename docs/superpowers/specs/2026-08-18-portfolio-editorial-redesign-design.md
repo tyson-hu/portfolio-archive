@@ -1,8 +1,8 @@
 # Portfolio Editorial Redesign
 
-Date: 2026-08-18  
-Status: Approved design contract; awaiting written-spec review  
-Scope: Local homepage implementation and verification only
+- Date: 2026-08-18
+- Status: Approved design contract; awaiting written-spec review
+- Scope: Local homepage implementation and verification only
 
 ## Objective
 

@@ -12,6 +12,14 @@ const excludes = (path, value) => !read(path).includes(value);
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const ruleContains = (path, selector, declaration) =>
   new RegExp(`${escapeRegExp(selector)}\\s*\\{[^}]*${escapeRegExp(declaration)}`, "s").test(read(path));
+const lastRuleIndex = (path, selector, declaration) => {
+  const matches = [
+    ...read(path).matchAll(
+      new RegExp(`${escapeRegExp(selector)}\\s*\\{[^}]*${escapeRegExp(declaration)}`, "gs"),
+    ),
+  ];
+  return matches.at(-1)?.index ?? -1;
+};
 const allContain = (path, values) => values.every((value) => contains(path, value));
 const normalizedContains = (path, value) =>
   read(path).replace(/\s+/g, " ").includes(value);
@@ -26,6 +34,81 @@ const activeHomepageFiles = [
   "src/components/portfolio/contact-footer.tsx",
 ];
 const activeHomepageContains = (value) => activeHomepageFiles.some((path) => contains(path, value));
+
+const cssHexCustomProperty = (path, property) =>
+  read(path).match(new RegExp(`${escapeRegExp(property)}\\s*:\\s*(#[0-9a-f]{6})\\s*;`, "i"))?.[1].toLowerCase();
+
+const relativeLuminance = (hex) => {
+  if (!hex) return null;
+  const channels = hex
+    .slice(1)
+    .match(/.{2}/g)
+    ?.map((channel) => Number.parseInt(channel, 16) / 255)
+    .map((channel) =>
+      channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+    );
+  if (!channels || channels.length !== 3 || channels.some(Number.isNaN)) return null;
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+};
+
+const contrastRatio = (foreground, background) => {
+  const foregroundLuminance = relativeLuminance(foreground);
+  const backgroundLuminance = relativeLuminance(background);
+  if (foregroundLuminance === null || backgroundLuminance === null) return 0;
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+};
+
+const contrastCheck = (label, foreground, background, minimum = 4.5) => {
+  const ratio = contrastRatio(foreground, background);
+  return [
+    `${label} (${foreground ?? "missing"} on ${background} = ${ratio.toFixed(2)}:1, minimum ${minimum.toFixed(1)}:1)`,
+    ratio >= minimum,
+  ];
+};
+
+const portfolioCssPath = "src/app/portfolio.css";
+const portfolioAccent = cssHexCustomProperty(portfolioCssPath, "--portfolio-accent");
+const projectCardColors = {
+  accent: portfolioAccent,
+  canvas: cssHexCustomProperty(portfolioCssPath, "--portfolio-canvas"),
+  lightAccentText: cssHexCustomProperty(portfolioCssPath, "--portfolio-accent-text") ?? portfolioAccent,
+  darkAccentText: cssHexCustomProperty(portfolioCssPath, "--portfolio-accent-text-on-dark") ?? portfolioAccent,
+};
+const projectCardContrastChecks = [
+  contrastCheck("flagship card label contrast", projectCardColors.darkAccentText, "#101613"),
+  contrastCheck("flagship subordinate-link hover contrast", projectCardColors.darkAccentText, "#101613"),
+  contrastCheck("flagship primary-link hover contrast", projectCardColors.canvas, projectCardColors.accent),
+  contrastCheck("study card label contrast", projectCardColors.lightAccentText, "#dce4ff"),
+  contrastCheck("study subordinate-link hover contrast", projectCardColors.lightAccentText, "#dce4ff"),
+  contrastCheck("study primary-link hover contrast", projectCardColors.canvas, projectCardColors.accent),
+  contrastCheck("OpenCore card label contrast", projectCardColors.lightAccentText, "#e1f0dc"),
+  contrastCheck("OpenCore project-link hover contrast", projectCardColors.lightAccentText, "#e1f0dc"),
+  contrastCheck("embedded card label contrast", projectCardColors.lightAccentText, "#f3f2ec"),
+  contrastCheck("embedded title-link hover contrast", projectCardColors.lightAccentText, "#f3f2ec"),
+];
+const contactFooterBasePaddingIndex = lastRuleIndex(portfolioCssPath, ".contact-footer", "padding:");
+const compactFooterMobilePaddingIndex = lastRuleIndex(
+  portfolioCssPath,
+  ".contact-footer.contact-footer--compact",
+  "padding-top: 52px",
+);
+const compactFooterDesktopPaddingIndex = lastRuleIndex(
+  portfolioCssPath,
+  ".contact-footer.contact-footer--compact",
+  "padding-top: 68px",
+);
+const compactFooterHeadingIndex = lastRuleIndex(
+  portfolioCssPath,
+  ".contact-footer.contact-footer--compact .contact-footer__intro h2",
+  "font-size: clamp(2.5rem, 4vw, 3.5rem)",
+);
+const compactFooterMetaIndex = lastRuleIndex(
+  portfolioCssPath,
+  ".contact-footer.contact-footer--compact .contact-footer__meta",
+  "margin-top: 46px",
+);
 
 const checks = {
   data: [
@@ -301,6 +384,43 @@ const checks = {
       "embedded title has a 44px target",
       ruleContains("src/app/portfolio.css", ".project-card--embedded h3 a", "min-height: 44px"),
     ],
+    [
+      "compact footer overrides follow all base padding shorthands",
+      contactFooterBasePaddingIndex >= 0 &&
+        compactFooterMobilePaddingIndex > contactFooterBasePaddingIndex &&
+        compactFooterDesktopPaddingIndex > compactFooterMobilePaddingIndex &&
+        compactFooterHeadingIndex > contactFooterBasePaddingIndex &&
+        compactFooterMetaIndex > contactFooterBasePaddingIndex,
+    ],
+    [
+      "project card text accents use surface-aware tokens",
+      ruleContains(
+        "src/app/portfolio.css",
+        ".project-card",
+        "--project-card-accent-text: var(--portfolio-accent-text)",
+      ) &&
+        ruleContains(
+          "src/app/portfolio.css",
+          ".project-card--flagship",
+          "--project-card-accent-text: var(--portfolio-accent-text-on-dark)",
+        ) &&
+        ruleContains(
+          "src/app/portfolio.css",
+          ".project-card__eyebrow",
+          "color: var(--project-card-accent-text)",
+        ) &&
+        ruleContains(
+          "src/app/portfolio.css",
+          ".project-card__links a:hover",
+          "color: var(--project-card-accent-text)",
+        ) &&
+        ruleContains(
+          "src/app/portfolio.css",
+          ".project-card--embedded h3 a:hover",
+          "color: var(--project-card-accent-text)",
+        ),
+    ],
+    ...projectCardContrastChecks,
   ],
 };
 

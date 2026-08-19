@@ -5,6 +5,8 @@
   --portfolio-ink: #101613;
   --portfolio-muted: #59615d;
   --portfolio-accent: #3d5fec;
+  --portfolio-accent-text: #2949bd;
+  --portfolio-accent-text-on-dark: #8fa8ff;
   --portfolio-rule: #d9d8d1;
 }
 
@@ -438,10 +440,6 @@
   border-top: 1px solid var(--portfolio-rule);
 }
 
-.contact-footer--compact {
-  padding-top: 52px;
-}
-
 @media (min-width: 560px) {
   .case-study-actions {
     flex-direction: row;
@@ -531,18 +529,6 @@
   .case-study-verification li > p,
   .case-study-boundaries li {
     font-size: 0.875rem;
-  }
-
-  .contact-footer--compact {
-    padding-top: 68px;
-  }
-
-  .contact-footer--compact .contact-footer__intro h2 {
-    font-size: clamp(2.5rem, 4vw, 3.5rem);
-  }
-
-  .contact-footer--compact .contact-footer__meta {
-    margin-top: 46px;
   }
 }
 
@@ -1174,6 +1160,8 @@
 }
 
 .project-card {
+  --project-card-accent-text: var(--portfolio-accent-text);
+
   position: relative;
   display: grid;
   min-width: 0;
@@ -1203,7 +1191,7 @@
 
 .project-card__eyebrow {
   margin: 0 0 18px;
-  color: var(--portfolio-accent);
+  color: var(--project-card-accent-text);
 }
 
 .project-card h3,
@@ -1268,7 +1256,7 @@
 }
 
 .project-card__links a:hover {
-  color: var(--portfolio-accent);
+  color: var(--project-card-accent-text);
 }
 
 .project-card__links--hierarchical {
@@ -1320,6 +1308,8 @@
 }
 
 .project-card--flagship {
+  --project-card-accent-text: var(--portfolio-accent-text-on-dark);
+
   border-color: #101613;
   background: #101613;
   color: #f3f2ec;
@@ -1417,7 +1407,7 @@
 }
 
 .project-card--embedded h3 a:hover {
-  color: var(--portfolio-accent);
+  color: var(--project-card-accent-text);
   text-decoration-color: currentColor;
 }
 
@@ -1607,5 +1597,23 @@
 
   .project-card--embedded .project-card__visual--waveform {
     min-height: 0;
+  }
+}
+
+.contact-footer.contact-footer--compact {
+  padding-top: 52px;
+}
+
+@media (min-width: 768px) {
+  .contact-footer.contact-footer--compact {
+    padding-top: 68px;
+  }
+
+  .contact-footer.contact-footer--compact .contact-footer__intro h2 {
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+  }
+
+  .contact-footer.contact-footer--compact .contact-footer__meta {
+    margin-top: 46px;
   }
 }

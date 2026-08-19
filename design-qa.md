@@ -1,6 +1,21 @@
-# Design QA — Portfolio editorial redesign
+# Design QA — historical portfolio editorial redesign snapshot (`dfb7aad`)
 
-## Source and capture evidence
+## Provenance and current validation
+
+This file records the accepted visual and design QA performed for commit `dfb7aad5ce30a5a891ac2bf42f6f07fc891df7b5`. The capture dimensions, browser observations, 51-check result, and `passed` disposition below apply only to that commit. They are retained as historical provenance, not as exact-head evidence for `e717cfe469379e58874b0ac70a62fea8987ddf68` or any later revision.
+
+All relative wording below—including “final,” “now,” “fresh,” “passed,” and “unresolved”—describes the `dfb7aad` snapshot and its then-current QA cycle. The `/tmp/...` and `/Users/...` capture paths document local inputs used for that cycle; they are not repository artifacts and are not guaranteed to remain available.
+
+The recruiter-audit and refinement series after `dfb7aad` changed the homepage hierarchy, the Eazy Review case-study shell, and the fixed-light theme-initializer contract. For the checked-out revision, the repository-local validation surfaces are:
+
+- Current recruiter-facing static contract: `pnpm check:portfolio -- all` (`scripts/check-portfolio-redesign.mjs`).
+- Fixed-light checker regression fixtures: `node scripts/check-theme-initializer-fixtures.mjs`.
+- Served-output fixed-light check: `pnpm check:theme-initializer -- <local-preview-url>` (`scripts/check-theme-initializer.mjs`).
+- Source and build checks: `pnpm lint`, `pnpm exec tsc --noEmit`, and `pnpm build`.
+
+Those commands and a fresh local rendered recruiter audit must be run and recorded against the exact revision under review. This historical file contains no browser capture, console, build, or exact-head acceptance claim for `e717cfe` or later.
+
+## Source and capture evidence for `dfb7aad`
 
 - Desktop source: `/Users/tysonhu/Downloads/tianzhe-portfolio-redesign-desktop.png`
 - Mobile source: `/Users/tysonhu/Downloads/tianzhe-portfolio-redesign-mobile.png`
@@ -22,14 +37,14 @@ The final mobile height differs by 17 pixels (0.2%). The final desktop height di
 
 The In-app Browser full-page screenshot path repeated sticky content and produced blank regions, so the final implementation captures were assembled only from Browser viewport screenshots. Scrollbars were temporarily hidden with a capture-only CSS rule, each scroll advanced by the exact visible-content height (797px mobile after the measured 47px sticky header; 827px desktop after the measured 73px sticky header), and each later viewport was cropped at the exact header/overlap boundary before vertical stitching. The capture-only CSS was removed immediately afterward. The resulting PNGs contain no repeated scrollbar thumbs or viewport-boundary seams. These earlier stitching artifacts were capture artifacts, not application findings.
 
-## Full-view evidence
+## Full-view evidence recorded for `dfb7aad`
 
 - Desktop comparison: source and `/tmp/portfolio-redesign-desktop.png` were opened together in the same comparison input after the final fixes and capture normalization.
 - Mobile comparison: source and `/tmp/portfolio-redesign-mobile.png` were opened together in the same comparison input after the final fixes and capture normalization.
 - Desktop result: hierarchy, grid canvas, header, hero, project-card ordering, approach/background/capability grouping, and contact footer track the reference. Approach renders in three lines, Background in two, and the final height is within 0.3% of the source.
 - Mobile result: 390 × 8282 closely tracks the 390 × 8299 source, including the compact header, six-line hero, exact three-line Work heading, stacked project rhythm, large flagship phone, coherent full study screenshot inside its tall frame, approach cards, neutral background cards, capability rules, and contact footer.
 
-## Focused evidence
+## Focused evidence recorded for `dfb7aad`
 
 Focused comparisons were necessary because full-page scaling made typography and project imagery too small to judge reliably.
 
@@ -83,7 +98,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 - P2: Mobile Work placed `clear` on the second line at 12ch; a measured 11ch width now renders exactly `Different project` / `types, with a` / `clear hierarchy.` without duplicating copy.
 - P2: The mobile Networking raster was forced through a 500px-tall `object-fit: cover` crop, leaving fragmented content. The approved real screenshot now uses `object-fit: contain`, centered inside the existing 500px browser frame, so the complete product state is coherent and undistorted while section rhythm stays aligned.
 - P3 polish: the BCI linked title now has a resting underline and accent hover affordance.
-- Final Browser evidence: desktop Approach/Background line counts `3/2`; mobile Work line count `3`; study frame `500px` with `object-fit: contain`; zero horizontal overflow; all four images complete with non-zero natural dimensions; fresh final console has zero warnings and zero errors.
+- `dfb7aad` Browser evidence: desktop Approach/Background line counts `3/2`; mobile Work line count `3`; study frame `500px` with `object-fit: contain`; zero horizontal overflow; all four images complete with non-zero natural dimensions; the fresh snapshot console had zero warnings and zero errors.
 
 ### Iteration 5 — whole-build review correction
 
@@ -97,7 +112,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 - The implementation intentionally preserves the approved evidence-qualified project summaries, metric source period, non-unique-visit note, technology lists, military role detail, and education wording. Their extra wrapping versus the visual reference is an approved content difference, not visual drift.
 - The study reference depicts a quiz-question panel, while the implementation uses the existing real `public/networking-study-platform.png` product screenshot. The approved spec explicitly requires that real asset. It is now centered and fully visible with `object-fit: contain` inside the reference-sized browser frame, without distortion. The remaining subject difference is therefore an approved real-content constraint, not an actionable P0–P2. A future replacement would require a newly approved real screenshot, not a fabricated reference mimic.
 
-## Required fidelity surfaces
+## Required fidelity surfaces recorded for `dfb7aad`
 
 - Fonts and typography: approved sans/mono families, heavy display hierarchy, compact mono rails, responsive sizes, letter spacing, and final headline/section wrapping were checked in full and focused comparisons. Desktop Approach/Background render in three/two lines and mobile Work in the exact three reference lines. Minor rasterization differences remain P3 only.
 - Spacing and layout rhythm: container widths, hero balance, section gaps, card padding/radii, desktop grid tracks, mobile stacking, and page-height density were checked. Final mobile height is within 0.2% and desktop within 0.5% of the sources.
@@ -106,7 +121,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 - Copy and content: labels, headings, project ordering, metrics, source period, non-unique-visit qualification, service/education records, technology groups, and link labels were checked. Longer evidence-qualified copy is intentionally preserved under the approved spec.
 - Icons, responsiveness, accessibility, and polish: Lucide directional icons match the interaction roles; desktop/mobile header changes, full mobile stacking, reduced-motion support, 44px targets, focus outlines, external-link contracts, anchor clearance, and overflow were verified.
 
-## Browser, overlay, console, and interaction results
+## Browser, overlay, console, and interaction results recorded for `dfb7aad`
 
 - Meaningful page identity: `Tianzhe Hu — Software Engineer`; expected hero, four project cards, Approach, Background, Capabilities, and Contact content present.
 - Framework overlay: no visible Next.js error/badge/toast overlay at either viewport or on `/projects/eazy-review`.
@@ -120,7 +135,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 - Keyboard focus: header Email and `View selected work` each render a 3px blue solid outline with 3px offset at desktop and mobile.
 - Back to top: reached `scrollY: 0`, hash `#top`, and focused the dedicated top anchor.
 
-## Static verification
+## Static verification recorded for `dfb7aad`
 
 - `pnpm check:portfolio -- all`: passed all 51 portfolio contract checks.
 - `pnpm lint`: passed.
@@ -133,8 +148,8 @@ Each reference/implementation pair was generated at the same pixel width and cro
 - The approved real study screenshot cannot match the reference's quiz-question subject exactly. If a real quiz-state screenshot is later approved, it could improve subject fidelity without weakening evidence integrity.
 - Minor font rasterization and exact text wrapping differ from the static reference because the implementation uses the approved project fonts and longer evidence-qualified copy.
 
-## Unresolved P0–P2
+## Unresolved P0–P2 recorded for `dfb7aad`
 
-None.
+None were recorded for that snapshot.
 
-final result: passed
+Historical QA result for commit `dfb7aad`: passed
