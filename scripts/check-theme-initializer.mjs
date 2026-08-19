@@ -13,7 +13,7 @@ const html = await response.text();
 const rootHtmlTag = html.match(/<html\b[^>]*>/i)?.[0];
 
 assert.ok(rootHtmlTag, `Expected <html> root in served HTML from ${targetUrl}`);
-const rootClassAttribute = rootHtmlTag.match(/\bclass\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+const rootClassAttribute = rootHtmlTag.match(/(?:^|\s)class\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
 const rootClassValue = rootClassAttribute?.slice(1).find((value) => value !== undefined) ?? "";
 const rootClassTokens = new Set(rootClassValue.split(/\s+/).filter(Boolean));
 
@@ -107,32 +107,6 @@ const executableJavaScript = (source) => {
   scanCode(0);
   return executable.join("");
 };
-const isPureFlightPayloadScript = (script) => {
-  let index = 0;
-  let foundFlightPush = false;
-
-  while (index < script.length) {
-    while (index < script.length && /[\s;]/.test(script[index])) index += 1;
-    if (index === script.length) return foundFlightPush;
-
-    const flightPush = /^self\s*\.\s*__next_f\s*\.\s*push\s*\(/.exec(script.slice(index));
-    if (!flightPush) return false;
-
-    foundFlightPush = true;
-    index += flightPush[0].length;
-    let parenthesisDepth = 1;
-
-    while (index < script.length && parenthesisDepth > 0) {
-      if (script[index] === "(") parenthesisDepth += 1;
-      if (script[index] === ")") parenthesisDepth -= 1;
-      index += 1;
-    }
-
-    if (parenthesisDepth !== 0) return false;
-  }
-
-  return foundFlightPush;
-};
 const hasRootMutation = (script) => {
   const rootAliases = [
     ...script.matchAll(
@@ -152,11 +126,10 @@ const hasRootMutation = (script) => {
 };
 const activeThemeInitializers = inlineScripts.filter((script) => {
   const executableScript = executableJavaScript(script);
-  const activeScript = !isPureFlightPayloadScript(executableScript);
   const mutatesRoot = hasRootMutation(executableScript);
   const readsThemePreference = /\b(?:localStorage|matchMedia)\b/.test(executableScript);
 
-  return activeScript && mutatesRoot && readsThemePreference;
+  return mutatesRoot && readsThemePreference;
 });
 
 assert.equal(

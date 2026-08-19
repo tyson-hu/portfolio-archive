@@ -25,6 +25,12 @@ const fixtures = [
     expectedError: missingLightAssertion,
   },
   {
+    name: "data-class does not satisfy the root class contract",
+    html: '<html data-class="light"><body></body></html>',
+    shouldPass: false,
+    expectedError: missingLightAssertion,
+  },
+  {
     name: "dark root token is rejected even when light is present",
     html: '<html class="light dark"><body></body></html>',
     shouldPass: false,
@@ -117,6 +123,12 @@ const fixtures = [
   {
     name: "initializer after a Flight push in the same script is rejected",
     html: '<html class="light"><body><script>self.__next_f.push([1,"payload"]); const theme=localStorage.getItem("theme"); document.documentElement.classList.add(theme)</script></body></html>',
+    shouldPass: false,
+    expectedError: initializerAssertion,
+  },
+  {
+    name: "initializer executed inside a Flight push argument is rejected",
+    html: '<html class="light"><body><script>self.__next_f.push([document.documentElement.classList.replace("light",localStorage.getItem("theme"))])</script></body></html>',
     shouldPass: false,
     expectedError: initializerAssertion,
   },
