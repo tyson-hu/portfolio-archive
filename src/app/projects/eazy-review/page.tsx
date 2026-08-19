@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import {
   ArrowDown,
   ArrowLeft,
-  ArrowRight,
   ArrowUpRight,
   CheckCircle2,
   Database,
@@ -13,8 +12,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ContactFooter } from "@/components/portfolio/contact-footer";
+import { CaseStudyNav } from "@/components/portfolio/case-study-nav";
+import { SiteHeader } from "@/components/portfolio/site-header";
 
 const REPOSITORY_URL = "https://github.com/Tyson-Hu/Eazy-Review";
 const EVIDENCE_COMMIT = "72149320c328532d2fb2e01da944bfa4b3cc9244";
@@ -100,6 +100,14 @@ const STACK = [
   "PostgreSQL",
 ] as const;
 
+const AT_A_GLANCE = {
+  product: "Mobile product-review application.",
+  projectContext: "Independent engineering project.",
+  coreInvariant:
+    "Personal ratings remain owner-scoped while community scores are server-derived.",
+  platform: "React Native, Expo, Supabase, and PostgreSQL.",
+} as const;
+
 const DECISIONS = [
   {
     number: "01",
@@ -108,6 +116,8 @@ const DECISIONS = [
       "A screen-level check cannot stop a caller from addressing another user's rating through the Data API.",
     decision:
       "I kept user_ratings owner-scoped with explicit column grants plus PostgreSQL RLS. auth.uid() must match user_id, writes require a published product, raw ratings and private notes are not public, and clients receive no aggregate-write policy.",
+    result:
+      "Personal ratings and private notes remain owner-scoped at the PostgreSQL boundary.",
     why:
       "The ownership invariant travels with the data instead of depending on one navigation path or client implementation.",
     verification:
@@ -127,6 +137,8 @@ const DECISIONS = [
       "Client-written composites or Community Scores can disagree with the submitted dimensions and diverge under concurrent database writers.",
     decision:
       "The client writes ten rating dimensions and an optional private note only. PostgreSQL derives the My Rating composite and trigger-owned Community aggregates. The create/edit path reads first, updates or inserts, recovers a 23505 branch with a permitted update, then invalidates public and owner-scoped caches.",
+    result:
+      "Connected reads return server-derived rating truth after create and edit operations settle.",
     why:
       "One derivation boundary keeps personal and aggregate score responsibilities explicit and makes connected reads return database truth.",
     verification:
@@ -147,6 +159,8 @@ const DECISIONS = [
       "Mobile requests can start offline, time out, lose the backend mid-flight, or receive stale authentication and recovery events.",
     decision:
       "Known-offline rating saves fail fast, connected requests have a deadline, and the save mutation neither pauses indefinitely nor retries automatically. Failed saves keep the draft for manual retry. Password recovery uses direct Supabase Auth calls plus a verified-only phase and generation/principal guards for stale events.",
+    result:
+      "Failed saves settle explicitly and retain the draft for a user-directed retry.",
     why:
       "A failed operation settles into understandable, recoverable UI without being reported as persisted or forcing the user to re-enter a rating.",
     verification:
@@ -162,53 +176,83 @@ const DECISIONS = [
   },
 ] as const;
 
-const VERIFICATION_ROWS = [
+const VERIFICATION_BUNDLES = [
   {
-    claim: "Anonymous connected catalog and reconnect behavior",
-    evidence: [
-      { label: "Task 15 result", href: EVIDENCE.task15Evidence },
+    title: "Application behavior",
+    summary:
+      "Catalog and session behavior, durable rating edits, explicit failure settlement, draft preservation, and password recovery.",
+    primaryEvidence: {
+      label: "Rating persistence evidence",
+      href: EVIDENCE.task17Evidence,
+    },
+    relatedEvidence: [
+      {
+        label: "Catalog and reconnect evidence",
+        href: EVIDENCE.task15Evidence,
+      },
       { label: "API contract", href: EVIDENCE.apiContracts },
-    ],
-  },
-  {
-    claim: "Email/password identity, session restore, and cache isolation",
-    evidence: [
-      { label: "Task 16 result", href: EVIDENCE.task16Evidence },
+      {
+        label: "Auth and session evidence",
+        href: EVIDENCE.task16Evidence,
+      },
       { label: "AuthProvider", href: EVIDENCE.authProvider },
+      {
+        label: "Draft-preservation test",
+        href: EVIDENCE.formPreservationTest,
+      },
+      { label: "Mutation behavior", href: EVIDENCE.ratingMutation },
+      {
+        label: "Failure-state tests",
+        href: EVIDENCE.ratingMutationTests,
+      },
+      { label: "Rating write path", href: EVIDENCE.ratingSave },
+      {
+        label: "Password recovery evidence",
+        href: EVIDENCE.task18Evidence,
+      },
     ],
   },
   {
-    claim: "Durable create/edit ratings and explicit save failures",
-    evidence: [
-      { label: "Task 17 result", href: EVIDENCE.task17Evidence },
-      { label: "Draft-preservation test", href: EVIDENCE.formPreservationTest },
-    ],
-  },
-  {
-    claim: "Owner-only RLS and least-privilege grants",
-    evidence: [
-      { label: "Database acceptance", href: EVIDENCE.databaseAcceptance },
-      { label: "Policy tests", href: EVIDENCE.authorizationTests },
-    ],
-  },
-  {
-    claim: "Server-derived aggregates and database race behavior",
-    evidence: [
+    title: "Data and authorization",
+    summary:
+      "Owner-only rows, least-privilege grants, server-derived aggregates, pgTAP coverage, and concurrent database behavior.",
+    primaryEvidence: {
+      label: "Database acceptance",
+      href: EVIDENCE.databaseAcceptance,
+    },
+    relatedEvidence: [
+      {
+        label: "RLS and grant migration",
+        href: EVIDENCE.rlsMigration,
+      },
+      {
+        label: "Current column allowlist",
+        href: EVIDENCE.currentRatingGrants,
+      },
+      {
+        label: "Authorization tests",
+        href: EVIDENCE.authorizationTests,
+      },
+      {
+        label: "Score derivation migration",
+        href: EVIDENCE.scoreDerivation,
+      },
       { label: "Aggregate pgTAP", href: EVIDENCE.aggregateTests },
-      { label: "Concurrency harness", href: EVIDENCE.concurrencyHarness },
+      {
+        label: "Concurrency harness",
+        href: EVIDENCE.concurrencyHarness,
+      },
     ],
   },
   {
-    claim: "Verified-only password recovery and stale-event guards",
-    evidence: [
-      { label: "Task 18 result", href: EVIDENCE.task18Evidence },
-      { label: "Recovery state machine", href: EVIDENCE.authProvider },
-    ],
-  },
-  {
-    claim: "Frontend, repository, database, security, and concurrency gates",
-    evidence: [
-      { label: "Expo CI", href: EVIDENCE.expoCi },
+    title: "System verification",
+    summary:
+      "Frontend, database, security, and concurrency definitions that guard the evidence-backed path.",
+    primaryEvidence: {
+      label: "Expo CI",
+      href: EVIDENCE.expoCi,
+    },
+    relatedEvidence: [
       { label: "Database CI", href: EVIDENCE.databaseCi },
     ],
   },
@@ -217,6 +261,24 @@ const VERIFICATION_ROWS = [
 const pageTitle = "Eazy Review Engineering Proof";
 const pageDescription =
   "A five-minute, evidence-backed case study of Eazy Review's mobile architecture, PostgreSQL authorization, server-owned aggregate scores, and connected failure handling.";
+
+const PROOF_HIGHLIGHTS = [
+  {
+    label: "Security",
+    description: "Owner-scoped PostgreSQL RLS and least-privilege access.",
+    icon: ShieldCheck,
+  },
+  {
+    label: "Verification",
+    description: "Automated frontend, database, auth, and concurrency evidence.",
+    icon: CheckCircle2,
+  },
+  {
+    label: "Reliability",
+    description: "Accepted physical-device offline, reconnect, and failure validation.",
+    icon: RefreshCcw,
+  },
+] as const;
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -249,10 +311,10 @@ function EvidenceLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex min-h-9 items-center gap-1 rounded-md font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="case-study-evidence-link"
     >
       {children}
-      <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      <ArrowUpRight size={14} strokeWidth={2.25} aria-hidden />
     </a>
   );
 }
@@ -269,341 +331,382 @@ function SectionHeading({
   description: string;
 }) {
   return (
-    <div className="space-y-2">
-      <p className="font-mono text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        {eyebrow}
-      </p>
-      <h2 id={id} className="text-2xl font-semibold tracking-tight sm:text-3xl">
-        {title}
-      </h2>
-      <p className="max-w-2xl text-pretty text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-        {description}
-      </p>
+    <div className="case-study-section-heading">
+      <p className="case-study-section-heading__eyebrow">{eyebrow}</p>
+      <h2 id={id}>{title}</h2>
+      <p>{description}</p>
     </div>
   );
 }
 
 export default function EazyReviewProofPage() {
   return (
-    <main className="flex min-h-dvh flex-col gap-20 pb-8">
-      <header className="space-y-8">
-        <Link
-          href="/"
-          className="inline-flex min-h-9 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Portfolio
-        </Link>
+    <>
+      <span className="portfolio-top-anchor" id="top" tabIndex={-1} />
+      <SiteHeader sectionHrefPrefix="/" currentArea="work" />
+      <main className="portfolio-page case-study-page">
+        <article className="case-study-shell">
+          <header className="case-study-hero case-study-reading-column">
+            <Link className="case-study-back-link" href="/">
+              <ArrowLeft size={16} strokeWidth={2.25} aria-hidden />
+              Portfolio
+            </Link>
 
-        <div className="space-y-6">
-          <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
-            Independent engineering project
-          </Badge>
-          <div className="space-y-3">
-            <h1 className="text-4xl font-semibold tracking-tighter sm:text-5xl">
-              Eazy Review
-            </h1>
-            <p className="max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">
-              A mobile product-review application with an anonymous connected
-              catalog, email/password accounts, durable per-user ratings, Rated
-              Products, and password recovery on Supabase and PostgreSQL.
+            <p className="case-study-hero__orientation">
+              Independent Engineering Case Study
             </p>
-          </div>
+            <h1>Eazy Review</h1>
+            <p className="case-study-hero__summary">
+              A React Native product-review system that keeps owner-scoped data
+              behind PostgreSQL RLS, derives scores on the server, and makes
+              connected failures recoverable.
+            </p>
 
-          <ul aria-label="Core technology stack" className="flex flex-wrap gap-2">
-            {STACK.map((technology) => (
-              <li key={technology}>
-                <Badge variant="outline" className="h-7 font-medium">
-                  {technology}
-                </Badge>
-              </li>
-            ))}
-          </ul>
+            <ul aria-label="Core technology stack" className="case-study-stack">
+              {STACK.map((technology) => (
+                <li key={technology}>{technology}</li>
+              ))}
+            </ul>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild>
+            <div className="case-study-actions">
+              <a
+                href="#overview"
+                className="case-study-action case-study-action--primary"
+              >
+                Project overview
+                <ArrowDown size={16} strokeWidth={2.25} aria-hidden />
+              </a>
               <a
                 href={REPOSITORY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="gap-2"
+                className="case-study-action case-study-action--secondary"
               >
-                <Github className="h-4 w-4" aria-hidden />
+                <Github size={16} strokeWidth={2.25} aria-hidden />
                 GitHub repository
+                <span className="sr-only"> (opens in a new tab)</span>
               </a>
-            </Button>
-            <Button asChild variant="outline">
-              <a href="#verification" className="gap-2">
-                How I verified it
-                <ArrowDown className="h-4 w-4" aria-hidden />
-              </a>
-            </Button>
-          </div>
-        </div>
-
-        <ul
-          aria-label="Engineering proof highlights"
-          className="grid gap-3 sm:grid-cols-3"
-        >
-          <li className="rounded-xl border bg-card p-4">
-            <ShieldCheck className="mb-3 h-5 w-5" aria-hidden />
-            <p className="text-sm font-semibold">Data-bound authorization</p>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              Owner-scoped PostgreSQL RLS protects personal ratings and private
-              notes at the database boundary.
-            </p>
-          </li>
-          <li className="rounded-xl border bg-card p-4">
-            <RefreshCcw className="mb-3 h-5 w-5" aria-hidden />
-            <p className="text-sm font-semibold">Honest connected failures</p>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              Offline, timeout, and unreachable-backend paths settle explicitly;
-              failed saves keep the draft for retry.
-            </p>
-          </li>
-          <li className="rounded-xl border bg-card p-4">
-            <CheckCircle2 className="mb-3 h-5 w-5" aria-hidden />
-            <p className="text-sm font-semibold">Inspectable verification</p>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              Frontend, authorization, aggregate, and database race checks are
-              paired with dated, accepted device evidence.
-            </p>
-          </li>
-        </ul>
-
-        <p className="text-xs leading-5 text-muted-foreground">
-          Evidence audited against commit{" "}
-          <EvidenceLink href={EVIDENCE.commit}>7214932</EvidenceLink>.
-        </p>
-      </header>
-
-      <section aria-labelledby="architecture-title" className="space-y-8">
-        <SectionHeading
-          id="architecture-title"
-          eyebrow="Architecture"
-          title="Clear ownership at each boundary"
-          description="Expo Router owns navigation and screen behavior. TanStack Query manages connected catalog and rating query state where applicable; Supabase Auth operations call the Auth SDK directly. PostgreSQL owns catalog, personal rating, and aggregate state behind RLS and trigger functions."
-        />
-
-        <div
-          aria-label="Eazy Review architecture responsibility flow"
-          className="space-y-3"
-        >
-          <div className="rounded-xl border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">01 · Client</p>
-            <p className="mt-2 font-semibold">React Native + Expo Router</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Navigation, rendering, form state, and client-side validation.
-            </p>
-          </div>
-          <ArrowDown
-            className="mx-auto h-4 w-4 text-muted-foreground"
-            aria-hidden
-          />
-          <div className="rounded-xl border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              02 · Connected state
-            </p>
-            <p className="mt-2 font-semibold">TanStack Query + NetInfo</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Query lifecycle, public versus owner-scoped cache keys,
-              reconnect/refetch behavior, and post-write invalidation. Auth is
-              not routed through this layer.
-            </p>
-          </div>
-          <ArrowDown
-            className="mx-auto h-4 w-4 text-muted-foreground"
-            aria-hidden
-          />
-          <div className="rounded-xl border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              03 · Shared service client
-            </p>
-            <p className="mt-2 font-semibold">Supabase JavaScript client</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              One typed client issues PostgreSQL Data API requests and direct
-              Supabase Auth calls.
-            </p>
-          </div>
-          <ArrowDown
-            className="mx-auto h-4 w-4 text-muted-foreground"
-            aria-hidden
-          />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border bg-card p-5">
-              <p className="font-mono text-xs text-muted-foreground">
-                04A · Identity
-              </p>
-              <p className="mt-2 font-semibold">Supabase Auth</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Email/password identity, local session lifecycle, and verified
-                password-recovery state.
-              </p>
             </div>
-            <div className="rounded-xl border bg-card p-5">
-              <p className="font-mono text-xs text-muted-foreground">
-                04B · Data boundary
-              </p>
-              <p className="mt-2 flex items-center gap-2 font-semibold">
-                <Database className="h-4 w-4" aria-hidden />
-                PostgreSQL
-              </p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Published catalog, owner ratings, and trigger-derived aggregates.
-                Explicit grants and RLS gate access at the row and column boundary.
-              </p>
-            </div>
-          </div>
-        </div>
+            <p className="case-study-hero__verification-link">
+              <a href="#verification">Verification evidence</a>
+            </p>
 
-        <p className="text-sm text-muted-foreground">
-          Inspect the{" "}
-          <EvidenceLink href={EVIDENCE.apiContracts}>client contracts</EvidenceLink>{" "}
-          and{" "}
-          <EvidenceLink href={EVIDENCE.dataModel}>data boundary</EvidenceLink>.
-        </p>
-      </section>
+            <ul aria-label="Engineering proof highlights" className="case-study-proof-strip">
+              {PROOF_HIGHLIGHTS.map(({ label, description, icon: Icon }) => (
+                <li key={label}>
+                  <Icon size={18} strokeWidth={2.1} aria-hidden />
+                  <div>
+                    <p className="case-study-proof-strip__label">{label}</p>
+                    <p>{description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
 
-      <section aria-labelledby="decisions-title" className="space-y-8">
-        <SectionHeading
-          id="decisions-title"
-          eyebrow="Three engineering decisions"
-          title="The choices that carry the most risk"
-          description="Each decision connects a product or security problem to an implementation boundary, automated proof, and an explicit limit."
-        />
+            <p className="case-study-audit-note">
+              Evidence audited against commit{" "}
+              <EvidenceLink href={EVIDENCE.commit}>7214932</EvidenceLink>.
+            </p>
+          </header>
 
-        <div className="space-y-5">
-          {DECISIONS.map((decision) => (
-            <article key={decision.number} className="rounded-xl border bg-card p-5 sm:p-6">
-              <div className="flex items-start gap-4">
-                <span className="font-mono text-sm text-muted-foreground">
-                  {decision.number}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-xl font-semibold tracking-tight">
-                    {decision.title}
+          <div className="case-study-body">
+            <CaseStudyNav />
+            <div className="case-study-body__content">
+          <section
+            id="overview"
+            aria-labelledby="overview-title"
+            className="case-study-section case-study-reading-column"
+          >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="overview"
+              aria-hidden="true"
+            />
+            <SectionHeading
+              id="overview-title"
+              eyebrow="At a Glance"
+              title="Product context before implementation detail"
+              description="A factual orientation to the product, its core invariant, and the evidence snapshot used by this case study."
+            />
+
+            <dl className="case-study-at-a-glance">
+              <div>
+                <dt>Product</dt>
+                <dd>{AT_A_GLANCE.product}</dd>
+              </div>
+              <div>
+                <dt>Project context</dt>
+                <dd>{AT_A_GLANCE.projectContext}</dd>
+              </div>
+              <div>
+                <dt>Core invariant</dt>
+                <dd>{AT_A_GLANCE.coreInvariant}</dd>
+              </div>
+              <div>
+                <dt>Platform</dt>
+                <dd>{AT_A_GLANCE.platform}</dd>
+              </div>
+              <div>
+                <dt>Evidence</dt>
+                <dd>
+                  <p>
+                    Automated frontend, database, authorization, and concurrency
+                    checks paired with accepted physical-device evidence.
+                  </p>
+                  <div className="case-study-at-a-glance__links">
+                    <EvidenceLink href={EVIDENCE.task15Evidence}>
+                      Task 15
+                    </EvidenceLink>
+                    <EvidenceLink href={EVIDENCE.task17Evidence}>
+                      Task 17
+                    </EvidenceLink>
+                    <EvidenceLink href={EVIDENCE.task18Evidence}>
+                      Task 18
+                    </EvidenceLink>
+                  </div>
+                </dd>
+              </div>
+              <div>
+                <dt>Evidence snapshot</dt>
+                <dd>
+                  <EvidenceLink href={EVIDENCE.commit}>
+                    {EVIDENCE_COMMIT}
+                  </EvidenceLink>
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section
+            id="architecture"
+            aria-labelledby="architecture-title"
+            className="case-study-section case-study-reading-column"
+          >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="architecture"
+              aria-hidden="true"
+            />
+            <SectionHeading
+              id="architecture-title"
+              eyebrow="Architecture"
+              title="Clear ownership at each boundary"
+              description="Expo Router owns navigation and screen behavior. TanStack Query manages connected catalog and rating query state where applicable; Supabase Auth operations call the Auth SDK directly. PostgreSQL owns catalog, personal rating, and aggregate state behind RLS and trigger functions."
+            />
+
+            <div
+              aria-label="Eazy Review architecture responsibility flow"
+              className="case-study-architecture"
+            >
+              <div className="case-study-architecture__node">
+                <p className="case-study-architecture__index">01 · Client</p>
+                <h3>React Native + Expo Router</h3>
+                <p>Navigation, rendering, form state, and client-side validation.</p>
+              </div>
+              <ArrowDown className="case-study-architecture__arrow" size={16} aria-hidden />
+              <div className="case-study-architecture__node">
+                <p className="case-study-architecture__index">02 · Connected state</p>
+                <h3>TanStack Query + NetInfo</h3>
+                <p>
+                  Query lifecycle, public versus owner-scoped cache keys,
+                  reconnect/refetch behavior, and post-write invalidation. Auth is
+                  not routed through this layer.
+                </p>
+              </div>
+              <ArrowDown className="case-study-architecture__arrow" size={16} aria-hidden />
+              <div className="case-study-architecture__node">
+                <p className="case-study-architecture__index">03 · Shared service client</p>
+                <h3>Supabase JavaScript client</h3>
+                <p>
+                  One typed client issues PostgreSQL Data API requests and direct
+                  Supabase Auth calls.
+                </p>
+              </div>
+              <ArrowDown className="case-study-architecture__arrow" size={16} aria-hidden />
+              <div className="case-study-architecture__split">
+                <div className="case-study-architecture__node">
+                  <p className="case-study-architecture__index">04A · Identity</p>
+                  <h3>Supabase Auth</h3>
+                  <p>
+                    Email/password identity, local session lifecycle, and verified
+                    password-recovery state.
+                  </p>
+                </div>
+                <div className="case-study-architecture__node">
+                  <p className="case-study-architecture__index">04B · Data boundary</p>
+                  <h3 className="case-study-architecture__database-title">
+                    <Database size={16} aria-hidden />
+                    PostgreSQL
                   </h3>
-                  <div className="mt-5 space-y-3 text-sm leading-6 text-muted-foreground">
-                    <p>
-                      <strong className="font-semibold text-foreground">Problem — </strong>
-                      {decision.problem}
-                    </p>
-                    <p>
-                      <strong className="font-semibold text-foreground">Decision — </strong>
-                      {decision.decision}
-                    </p>
-                    <p>
-                      <strong className="font-semibold text-foreground">Why — </strong>
-                      {decision.why}
-                    </p>
-                    <p>
-                      <strong className="font-semibold text-foreground">Verification — </strong>
-                      {decision.verification}
-                    </p>
-                    <p>
-                      <strong className="font-semibold text-foreground">Boundary — </strong>
-                      {decision.boundary}
-                    </p>
-                  </div>
-                  <div className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                    {decision.links.map((link) => (
-                      <EvidenceLink key={link.href} href={link.href}>
-                        {link.label}
-                      </EvidenceLink>
-                    ))}
-                  </div>
+                  <p>
+                    Published catalog, owner ratings, and trigger-derived aggregates.
+                    Explicit grants and RLS gate access at the row and column boundary.
+                  </p>
                 </div>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
+            </div>
 
-      <section
-        id="verification"
-        aria-labelledby="verification-title"
-        className="scroll-mt-8 space-y-8"
-      >
-        <SectionHeading
-          id="verification-title"
-          eyebrow="Verification"
-          title="How I verified it"
-          description="The proof is intentionally layered: current implementation and focused tests, database behavior, dated accepted device evidence, and CI definitions."
-        />
+            <p className="case-study-supporting-link">
+              Inspect the{" "}
+              <EvidenceLink href={EVIDENCE.apiContracts}>client contracts</EvidenceLink>{" "}
+              and <EvidenceLink href={EVIDENCE.dataModel}>data boundary</EvidenceLink>.
+            </p>
+          </section>
 
-        <ul className="overflow-hidden rounded-xl border bg-card">
-          {VERIFICATION_ROWS.map((row, index) => (
-            <li
-              key={row.claim}
-              className={`grid gap-2 p-4 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] sm:items-center sm:gap-6 ${
-                index > 0 ? "border-t" : ""
-              }`}
-            >
-              <p className="text-sm font-medium leading-6">{row.claim}</p>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground sm:justify-end">
-                {row.evidence.map((item) => (
-                  <EvidenceLink key={item.href} href={item.href}>
-                    {item.label}
-                  </EvidenceLink>
-                ))}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <section
+            id="decisions"
+            aria-labelledby="decisions-title"
+            className="case-study-section case-study-reading-column"
+          >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="decisions"
+              aria-hidden="true"
+            />
+            <SectionHeading
+              id="decisions-title"
+              eyebrow="Three engineering decisions"
+              title="The choices that carry the most risk"
+              description="Each decision connects a product or security problem to an implementation boundary, automated proof, and an explicit limit."
+            />
 
-      <section aria-labelledby="boundaries-title" className="space-y-6">
-        <SectionHeading
-          id="boundaries-title"
-          eyebrow="Current boundaries"
-          title="What this project does not claim"
-          description="The implemented critical path is real; release and product-completeness work remains deliberately separate."
-        />
+            <div className="case-study-decisions">
+              {DECISIONS.map((decision) => (
+                <article key={decision.number} className="case-study-decision">
+                  <p className="case-study-decision__number">{decision.number}</p>
+                  <div className="case-study-decision__body">
+                    <h3>{decision.title}</h3>
+                    <div className="case-study-decision__record">
+                      <p><strong>Problem — </strong>{decision.problem}</p>
+                      <p><strong>Decision — </strong>{decision.decision}</p>
+                      <p><strong>Result — </strong>{decision.result}</p>
+                    </div>
+                    <details className="case-study-decision__details">
+                      <summary>Why, verification, and evidence</summary>
+                      <div className="case-study-decision__details-content">
+                        <p>
+                          <strong>Why — </strong>
+                          {decision.why}
+                        </p>
+                        <p>
+                          <strong>Verification — </strong>
+                          {decision.verification}
+                        </p>
+                        <p>
+                          <strong>Boundary — </strong>
+                          {decision.boundary}
+                        </p>
+                        <div className="case-study-decision__links">
+                          {decision.links.map((link) => (
+                            <EvidenceLink key={link.href} href={link.href}>
+                              {link.label}
+                            </EvidenceLink>
+                          ))}
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
 
-        <ul className="grid gap-3 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
-          <li className="rounded-xl border bg-card p-4">
-            Feed remains a placeholder, and protected account deletion is still
-            pending as Task 19.
-          </li>
-          <li className="rounded-xl border bg-card p-4">
-            Catalog cache is in memory only. There is no durable offline write
-            queue.
-          </li>
-          <li className="rounded-xl border bg-card p-4">
-            The current ten-dimension schema and recovery work were not staged
-            or deployed. Production recovery-host configuration, TestFlight,
-            App Store work, and release QA remain later tasks.
-          </li>
-          <li className="rounded-xl border bg-card p-4">
-            This case study makes no claim about production users, traffic,
-            scale, uptime, or a store launch.
-          </li>
-        </ul>
+          <section
+            id="verification"
+            aria-labelledby="verification-title"
+            className="case-study-section case-study-reading-column"
+          >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="verification"
+              aria-hidden="true"
+            />
+            <SectionHeading
+              id="verification-title"
+              eyebrow="Verification"
+              title="How I verified it"
+              description="The proof is intentionally layered: current implementation and focused tests, database behavior, dated accepted device evidence, and CI definitions."
+            />
 
-        <p className="text-sm text-muted-foreground">
-          Current scope and task status: {" "}
-          <EvidenceLink href={EVIDENCE.tasks}>docs/TASKS.md</EvidenceLink>.
-        </p>
-      </section>
+            <ul className="case-study-verification">
+              {VERIFICATION_BUNDLES.map((bundle) => (
+                <li key={bundle.title}>
+                  <div className="case-study-verification__summary">
+                    <h3>{bundle.title}</h3>
+                    <p>{bundle.summary}</p>
+                    <EvidenceLink href={bundle.primaryEvidence.href}>
+                      {bundle.primaryEvidence.label}
+                    </EvidenceLink>
+                  </div>
+                  <details className="case-study-verification__details">
+                    <summary>View related evidence</summary>
+                    <div className="case-study-verification__links">
+                      {bundle.relatedEvidence.map((item) => (
+                        <EvidenceLink key={item.href} href={item.href}>
+                          {item.label}
+                        </EvidenceLink>
+                      ))}
+                    </div>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-      <footer className="flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center sm:justify-between">
-        <Link
-          href="/"
-          className="inline-flex min-h-9 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Back to portfolio
-        </Link>
-        <a
-          href={REPOSITORY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-9 items-center gap-2 rounded-md text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          Browse the repository
-          <ArrowRight className="h-4 w-4" aria-hidden />
-        </a>
-      </footer>
-    </main>
+          <section
+            id="boundaries"
+            aria-labelledby="boundaries-title"
+            className="case-study-section case-study-reading-column"
+          >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="boundaries"
+              aria-hidden="true"
+            />
+            <SectionHeading
+              id="boundaries-title"
+              eyebrow="Current boundaries"
+              title="What this project does not claim"
+              description="The implemented critical path is real; release and product-completeness work remains deliberately separate."
+            />
+
+            <ul className="case-study-boundaries">
+              <li>
+                Feed remains a placeholder, and protected account deletion is still
+                pending as Task 19.
+              </li>
+              <li>
+                Catalog cache is in memory only. There is no durable offline write
+                queue.
+              </li>
+              <li>
+                The current ten-dimension schema and recovery work were not staged
+                or deployed. Production recovery-host configuration, TestFlight,
+                App Store work, and release QA remain later tasks.
+              </li>
+              <li>
+                This case study makes no claim about production users, traffic,
+                scale, uptime, or a store launch.
+              </li>
+            </ul>
+
+            <p className="case-study-supporting-link">
+              Current scope and task status: {" "}
+              <EvidenceLink href={EVIDENCE.tasks}>docs/TASKS.md</EvidenceLink>.
+            </p>
+          </section>
+
+          <div className="case-study-return case-study-reading-column">
+            <Link href="/">
+              <ArrowLeft size={16} strokeWidth={2.25} aria-hidden />
+              Back to portfolio
+            </Link>
+          </div>
+            </div>
+          </div>
+        </article>
+      </main>
+      <ContactFooter compact />
+    </>
   );
 }

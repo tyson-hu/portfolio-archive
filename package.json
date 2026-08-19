@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "check:portfolio": "node scripts/check-portfolio-redesign.mjs",
+    "check:theme-initializer": "node scripts/check-theme-initializer.mjs",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",

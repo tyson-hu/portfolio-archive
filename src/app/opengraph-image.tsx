@@ -1,7 +1,9 @@
 import { ImageResponse } from "next/og";
-import { DATA } from "@/data/resume";
+import { PORTFOLIO } from "@/data/portfolio";
 
-export const alt = DATA.name;
+const { identity } = PORTFOLIO;
+
+export const alt = identity.name;
 export const size = {
   width: 1200,
   height: 630,
@@ -123,8 +125,8 @@ async function loadAvatarSrc(url: string) {
 }
 
 export default async function Image() {
-  const imageUrl = DATA.avatarUrl
-    ? resolveImageUrl(DATA.avatarUrl, DATA.url)
+  const imageUrl = identity.avatarUrl
+    ? resolveImageUrl(identity.avatarUrl, identity.url)
     : undefined;
   const avatarSrc = imageUrl ? await loadAvatarSrc(imageUrl) : undefined;
 
@@ -135,15 +137,15 @@ export default async function Image() {
           <div style={styles.wrapper}>
             <div style={styles.imageSection}>
               {avatarSrc ? (
-                <img src={avatarSrc} alt={DATA.name} style={styles.image} />
+                <img src={avatarSrc} alt={identity.name} style={styles.image} />
               ) : (
-                <div style={styles.initials}>{DATA.initials}</div>
+                <div style={styles.initials}>{identity.initials}</div>
               )}
             </div>
             <div style={styles.mainContainer}>
-              <div style={styles.title}>{DATA.name}</div>
-              {DATA.description && (
-                <div style={styles.description}>{DATA.description}</div>
+              <div style={styles.title}>{identity.name}</div>
+              {identity.description && (
+                <div style={styles.description}>{identity.description}</div>
               )}
             </div>
           </div>

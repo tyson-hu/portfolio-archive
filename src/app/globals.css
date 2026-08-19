@@ -118,6 +118,11 @@
 
   body {
     @apply bg-background text-foreground;
+    overflow-x: clip;
+  }
+
+  img {
+    max-width: 100%;
   }
 
   /* Shiki dual theme support */
