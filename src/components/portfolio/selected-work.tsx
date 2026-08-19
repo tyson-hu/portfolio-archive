@@ -95,7 +95,6 @@ function StudyProject({ project }: ProjectCardProps) {
         <h3>{project.title}</h3>
         <p className="project-card__description">{project.description}</p>
         <ProjectProof project={project} />
-        <p className="project-card__metric-summary">{project.metricSummary}</p>
         <p className="project-card__technologies">{project.technologies.join(" · ")}</p>
         <ProjectLinks links={project.links} emphasizeFirst />
       </div>

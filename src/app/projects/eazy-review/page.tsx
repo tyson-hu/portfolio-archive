@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { ContactFooter } from "@/components/portfolio/contact-footer";
+import { CaseStudyNav } from "@/components/portfolio/case-study-nav";
 import { SiteHeader } from "@/components/portfolio/site-header";
 
 const REPOSITORY_URL = "https://github.com/Tyson-Hu/Eazy-Review";
@@ -99,6 +100,14 @@ const STACK = [
   "PostgreSQL",
 ] as const;
 
+const AT_A_GLANCE = {
+  product: "Mobile product-review application.",
+  projectContext: "Independent engineering project.",
+  coreInvariant:
+    "Personal ratings remain owner-scoped while community scores are server-derived.",
+  platform: "React Native, Expo, Supabase, and PostgreSQL.",
+} as const;
+
 const DECISIONS = [
   {
     number: "01",
@@ -107,6 +116,8 @@ const DECISIONS = [
       "A screen-level check cannot stop a caller from addressing another user's rating through the Data API.",
     decision:
       "I kept user_ratings owner-scoped with explicit column grants plus PostgreSQL RLS. auth.uid() must match user_id, writes require a published product, raw ratings and private notes are not public, and clients receive no aggregate-write policy.",
+    result:
+      "Personal ratings and private notes remain owner-scoped at the PostgreSQL boundary.",
     why:
       "The ownership invariant travels with the data instead of depending on one navigation path or client implementation.",
     verification:
@@ -126,6 +137,8 @@ const DECISIONS = [
       "Client-written composites or Community Scores can disagree with the submitted dimensions and diverge under concurrent database writers.",
     decision:
       "The client writes ten rating dimensions and an optional private note only. PostgreSQL derives the My Rating composite and trigger-owned Community aggregates. The create/edit path reads first, updates or inserts, recovers a 23505 branch with a permitted update, then invalidates public and owner-scoped caches.",
+    result:
+      "Connected reads return server-derived rating truth after create and edit operations settle.",
     why:
       "One derivation boundary keeps personal and aggregate score responsibilities explicit and makes connected reads return database truth.",
     verification:
@@ -146,6 +159,8 @@ const DECISIONS = [
       "Mobile requests can start offline, time out, lose the backend mid-flight, or receive stale authentication and recovery events.",
     decision:
       "Known-offline rating saves fail fast, connected requests have a deadline, and the save mutation neither pauses indefinitely nor retries automatically. Failed saves keep the draft for manual retry. Password recovery uses direct Supabase Auth calls plus a verified-only phase and generation/principal guards for stale events.",
+    result:
+      "Failed saves settle explicitly and retain the draft for a user-directed retry.",
     why:
       "A failed operation settles into understandable, recoverable UI without being reported as persisted or forcing the user to re-enter a rating.",
     verification:
@@ -161,53 +176,83 @@ const DECISIONS = [
   },
 ] as const;
 
-const VERIFICATION_ROWS = [
+const VERIFICATION_BUNDLES = [
   {
-    claim: "Anonymous connected catalog and reconnect behavior",
-    evidence: [
-      { label: "Catalog and reconnect evidence", href: EVIDENCE.task15Evidence },
+    title: "Application behavior",
+    summary:
+      "Catalog and session behavior, durable rating edits, explicit failure settlement, draft preservation, and password recovery.",
+    primaryEvidence: {
+      label: "Rating persistence evidence",
+      href: EVIDENCE.task17Evidence,
+    },
+    relatedEvidence: [
+      {
+        label: "Catalog and reconnect evidence",
+        href: EVIDENCE.task15Evidence,
+      },
       { label: "API contract", href: EVIDENCE.apiContracts },
-    ],
-  },
-  {
-    claim: "Email/password identity, session restore, and cache isolation",
-    evidence: [
-      { label: "Auth and session evidence", href: EVIDENCE.task16Evidence },
+      {
+        label: "Auth and session evidence",
+        href: EVIDENCE.task16Evidence,
+      },
       { label: "AuthProvider", href: EVIDENCE.authProvider },
+      {
+        label: "Draft-preservation test",
+        href: EVIDENCE.formPreservationTest,
+      },
+      { label: "Mutation behavior", href: EVIDENCE.ratingMutation },
+      {
+        label: "Failure-state tests",
+        href: EVIDENCE.ratingMutationTests,
+      },
+      { label: "Rating write path", href: EVIDENCE.ratingSave },
+      {
+        label: "Password recovery evidence",
+        href: EVIDENCE.task18Evidence,
+      },
     ],
   },
   {
-    claim: "Durable create/edit ratings and explicit save failures",
-    evidence: [
-      { label: "Rating persistence evidence", href: EVIDENCE.task17Evidence },
-      { label: "Draft-preservation test", href: EVIDENCE.formPreservationTest },
-    ],
-  },
-  {
-    claim: "Owner-only RLS and least-privilege grants",
-    evidence: [
-      { label: "Database acceptance", href: EVIDENCE.databaseAcceptance },
-      { label: "Policy tests", href: EVIDENCE.authorizationTests },
-    ],
-  },
-  {
-    claim: "Server-derived aggregates and database race behavior",
-    evidence: [
+    title: "Data and authorization",
+    summary:
+      "Owner-only rows, least-privilege grants, server-derived aggregates, pgTAP coverage, and concurrent database behavior.",
+    primaryEvidence: {
+      label: "Database acceptance",
+      href: EVIDENCE.databaseAcceptance,
+    },
+    relatedEvidence: [
+      {
+        label: "RLS and grant migration",
+        href: EVIDENCE.rlsMigration,
+      },
+      {
+        label: "Current column allowlist",
+        href: EVIDENCE.currentRatingGrants,
+      },
+      {
+        label: "Authorization tests",
+        href: EVIDENCE.authorizationTests,
+      },
+      {
+        label: "Score derivation migration",
+        href: EVIDENCE.scoreDerivation,
+      },
       { label: "Aggregate pgTAP", href: EVIDENCE.aggregateTests },
-      { label: "Concurrency harness", href: EVIDENCE.concurrencyHarness },
+      {
+        label: "Concurrency harness",
+        href: EVIDENCE.concurrencyHarness,
+      },
     ],
   },
   {
-    claim: "Verified-only password recovery and stale-event guards",
-    evidence: [
-      { label: "Password recovery evidence", href: EVIDENCE.task18Evidence },
-      { label: "Recovery state machine", href: EVIDENCE.authProvider },
-    ],
-  },
-  {
-    claim: "Frontend, repository, database, security, and concurrency gates",
-    evidence: [
-      { label: "Expo CI", href: EVIDENCE.expoCi },
+    title: "System verification",
+    summary:
+      "Frontend, database, security, and concurrency definitions that guard the evidence-backed path.",
+    primaryEvidence: {
+      label: "Expo CI",
+      href: EVIDENCE.expoCi,
+    },
+    relatedEvidence: [
       { label: "Database CI", href: EVIDENCE.databaseCi },
     ],
   },
@@ -298,7 +343,7 @@ export default function EazyReviewProofPage() {
   return (
     <>
       <span className="portfolio-top-anchor" id="top" tabIndex={-1} />
-      <SiteHeader sectionHrefPrefix="/" />
+      <SiteHeader sectionHrefPrefix="/" currentArea="work" />
       <main className="portfolio-page case-study-page">
         <article className="case-study-shell">
           <header className="case-study-hero case-study-reading-column">
@@ -325,22 +370,26 @@ export default function EazyReviewProofPage() {
 
             <div className="case-study-actions">
               <a
+                href="#overview"
+                className="case-study-action case-study-action--primary"
+              >
+                Project overview
+                <ArrowDown size={16} strokeWidth={2.25} aria-hidden />
+              </a>
+              <a
                 href={REPOSITORY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="case-study-action case-study-action--primary"
+                className="case-study-action case-study-action--secondary"
               >
                 <Github size={16} strokeWidth={2.25} aria-hidden />
                 GitHub repository
-              </a>
-              <a
-                href="#verification"
-                className="case-study-action case-study-action--secondary"
-              >
-                How I verified it
-                <ArrowDown size={16} strokeWidth={2.25} aria-hidden />
+                <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </div>
+            <p className="case-study-hero__verification-link">
+              <a href="#verification">Verification evidence</a>
+            </p>
 
             <ul aria-label="Engineering proof highlights" className="case-study-proof-strip">
               {PROOF_HIGHLIGHTS.map(({ label, description, icon: Icon }) => (
@@ -360,10 +409,84 @@ export default function EazyReviewProofPage() {
             </p>
           </header>
 
+          <div className="case-study-body">
+            <CaseStudyNav />
+            <div className="case-study-body__content">
           <section
+            id="overview"
+            aria-labelledby="overview-title"
+            className="case-study-section case-study-reading-column"
+          >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="overview"
+              aria-hidden="true"
+            />
+            <SectionHeading
+              id="overview-title"
+              eyebrow="At a Glance"
+              title="Product context before implementation detail"
+              description="A factual orientation to the product, its core invariant, and the evidence snapshot used by this case study."
+            />
+
+            <dl className="case-study-at-a-glance">
+              <div>
+                <dt>Product</dt>
+                <dd>{AT_A_GLANCE.product}</dd>
+              </div>
+              <div>
+                <dt>Project context</dt>
+                <dd>{AT_A_GLANCE.projectContext}</dd>
+              </div>
+              <div>
+                <dt>Core invariant</dt>
+                <dd>{AT_A_GLANCE.coreInvariant}</dd>
+              </div>
+              <div>
+                <dt>Platform</dt>
+                <dd>{AT_A_GLANCE.platform}</dd>
+              </div>
+              <div>
+                <dt>Evidence</dt>
+                <dd>
+                  <p>
+                    Automated frontend, database, authorization, and concurrency
+                    checks paired with accepted physical-device evidence.
+                  </p>
+                  <div className="case-study-at-a-glance__links">
+                    <EvidenceLink href={EVIDENCE.task15Evidence}>
+                      Task 15
+                    </EvidenceLink>
+                    <EvidenceLink href={EVIDENCE.task17Evidence}>
+                      Task 17
+                    </EvidenceLink>
+                    <EvidenceLink href={EVIDENCE.task18Evidence}>
+                      Task 18
+                    </EvidenceLink>
+                  </div>
+                </dd>
+              </div>
+              <div>
+                <dt>Evidence snapshot</dt>
+                <dd>
+                  <EvidenceLink href={EVIDENCE.commit}>
+                    {EVIDENCE_COMMIT}
+                  </EvidenceLink>
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section
+            id="architecture"
             aria-labelledby="architecture-title"
             className="case-study-section case-study-reading-column"
           >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="architecture"
+              aria-hidden="true"
+            />
             <SectionHeading
               id="architecture-title"
               eyebrow="Architecture"
@@ -431,9 +554,15 @@ export default function EazyReviewProofPage() {
           </section>
 
           <section
+            id="decisions"
             aria-labelledby="decisions-title"
             className="case-study-section case-study-reading-column"
           >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="decisions"
+              aria-hidden="true"
+            />
             <SectionHeading
               id="decisions-title"
               eyebrow="Three engineering decisions"
@@ -450,17 +579,32 @@ export default function EazyReviewProofPage() {
                     <div className="case-study-decision__record">
                       <p><strong>Problem — </strong>{decision.problem}</p>
                       <p><strong>Decision — </strong>{decision.decision}</p>
-                      <p><strong>Why — </strong>{decision.why}</p>
-                      <p><strong>Verification — </strong>{decision.verification}</p>
-                      <p><strong>Boundary — </strong>{decision.boundary}</p>
+                      <p><strong>Result — </strong>{decision.result}</p>
                     </div>
-                    <div className="case-study-decision__links">
-                      {decision.links.map((link) => (
-                        <EvidenceLink key={link.href} href={link.href}>
-                          {link.label}
-                        </EvidenceLink>
-                      ))}
-                    </div>
+                    <details className="case-study-decision__details">
+                      <summary>Why, verification, and evidence</summary>
+                      <div className="case-study-decision__details-content">
+                        <p>
+                          <strong>Why — </strong>
+                          {decision.why}
+                        </p>
+                        <p>
+                          <strong>Verification — </strong>
+                          {decision.verification}
+                        </p>
+                        <p>
+                          <strong>Boundary — </strong>
+                          {decision.boundary}
+                        </p>
+                        <div className="case-study-decision__links">
+                          {decision.links.map((link) => (
+                            <EvidenceLink key={link.href} href={link.href}>
+                              {link.label}
+                            </EvidenceLink>
+                          ))}
+                        </div>
+                      </div>
+                    </details>
                   </div>
                 </article>
               ))}
@@ -472,6 +616,11 @@ export default function EazyReviewProofPage() {
             aria-labelledby="verification-title"
             className="case-study-section case-study-reading-column"
           >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="verification"
+              aria-hidden="true"
+            />
             <SectionHeading
               id="verification-title"
               eyebrow="Verification"
@@ -480,25 +629,40 @@ export default function EazyReviewProofPage() {
             />
 
             <ul className="case-study-verification">
-              {VERIFICATION_ROWS.map((row) => (
-                <li key={row.claim}>
-                  <p>{row.claim}</p>
-                  <div>
-                    {row.evidence.map((item) => (
-                      <EvidenceLink key={item.href} href={item.href}>
-                        {item.label}
-                      </EvidenceLink>
-                    ))}
+              {VERIFICATION_BUNDLES.map((bundle) => (
+                <li key={bundle.title}>
+                  <div className="case-study-verification__summary">
+                    <h3>{bundle.title}</h3>
+                    <p>{bundle.summary}</p>
+                    <EvidenceLink href={bundle.primaryEvidence.href}>
+                      {bundle.primaryEvidence.label}
+                    </EvidenceLink>
                   </div>
+                  <details className="case-study-verification__details">
+                    <summary>View related evidence</summary>
+                    <div className="case-study-verification__links">
+                      {bundle.relatedEvidence.map((item) => (
+                        <EvidenceLink key={item.href} href={item.href}>
+                          {item.label}
+                        </EvidenceLink>
+                      ))}
+                    </div>
+                  </details>
                 </li>
               ))}
             </ul>
           </section>
 
           <section
+            id="boundaries"
             aria-labelledby="boundaries-title"
             className="case-study-section case-study-reading-column"
           >
+            <span
+              className="case-study-section-marker"
+              data-case-study-marker="boundaries"
+              aria-hidden="true"
+            />
             <SectionHeading
               id="boundaries-title"
               eyebrow="Current boundaries"
@@ -537,6 +701,8 @@ export default function EazyReviewProofPage() {
               <ArrowLeft size={16} strokeWidth={2.25} aria-hidden />
               Back to portfolio
             </Link>
+          </div>
+            </div>
           </div>
         </article>
       </main>

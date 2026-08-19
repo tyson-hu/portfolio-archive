@@ -27,7 +27,7 @@
 
 Create:
 
-- `src/data/portfolio.ts` — typed homepage content, links, metrics, presentation variants, and asset paths.
+- `src/data/portfolio.ts` — typed homepage content, links, proof points, presentation variants, and asset paths.
 - `src/components/portfolio/site-header.tsx` — sticky desktop/mobile navigation.
 - `src/components/portfolio/section-heading.tsx` — shared numbered section heading contract.
 - `src/components/portfolio/hero-section.tsx` — hero copy, CTAs, service record, and engineering-priorities panel.
@@ -71,7 +71,7 @@ Leave in place:
 **Interfaces:**
 
 - Produces: `PORTFOLIO: PortfolioData` and CLI command `pnpm check:portfolio -- <group>`.
-- Consumes: Existing factual URLs, summaries, dates, metrics, and contact details from `src/data/resume.tsx`.
+- Consumes: Existing factual URLs, summaries, dates, and contact details from `src/data/resume.tsx`.
 
 - [ ] **Step 1: Add the grouped structural checker before creating the new data module**
 
@@ -94,9 +94,7 @@ const checks = {
   data: [
     ["typed portfolio export", contains("src/data/portfolio.ts", "export const PORTFOLIO")],
     ["approved hero headline", contains("src/data/portfolio.ts", "Reliable software, from product interfaces to system boundaries.")],
-    ["honest visit metric", contains("src/data/portfolio.ts", 'value: "≈1.8K"')],
-    ["honest page-view metric", contains("src/data/portfolio.ts", 'value: "≈4K"')],
-    ["metric qualification", contains("src/data/portfolio.ts", "Visits are not unique users.")],
+    ["Networking traffic analytics removed", excludes("src/data/portfolio.ts", "metricSummary")],
     ["three capability groups", contains("src/data/portfolio.ts", 'title: "Systems and delivery"')],
   ],
   assets: [
@@ -190,9 +188,6 @@ export interface PortfolioProject {
   links: readonly PortfolioLink[];
   image: string;
   imageAlt: string;
-  metrics?: readonly { value: string; label: string }[];
-  metricPeriod?: string;
-  metricNote?: string;
 }
 
 export interface PortfolioData {
@@ -501,7 +496,7 @@ Render `.project-card--flagship` with the Eazy Review eyebrow, title, technical 
 
 - [ ] **Step 4: Implement the study variant**
 
-Render `.project-card--study` with the 404-question summary, two metric tiles, source-period metadata, `Visits are not unique users.` note, live-site and GitHub links, and the real networking screenshot. Position the screenshot as a browser-like product crop using `object-fit`/`object-position`, not CSS-generated UI.
+Render `.project-card--study` with the 404-question summary, evergreen product proof, live-site and GitHub links, and the real networking screenshot. Do not render traffic analytics or dated metric metadata. Position the screenshot as a browser-like product crop using `object-fit`/`object-position`, not CSS-generated UI.
 
 - [ ] **Step 5: Implement the OpenCore and embedded variants**
 
@@ -521,7 +516,7 @@ const requireProject = (slug: PortfolioProject["slug"]) => {
 
 - [ ] **Step 7: Add work-section responsive styles**
 
-Desktop: 1120px flagship, 500px approximate height; 646/456 asymmetric secondary row with 20px gap; compact full-width BCI row. Mobile: all cards stack, visuals move beneath copy, reference radii/colors/padding are retained, and no horizontal overflow appears at 390px.
+Desktop: 1120px flagship, 500px approximate height; 646/456 asymmetric secondary row with a 20px gap, equal-height card surfaces, and bottom-aligned visuals; compact full-width BCI row. Mobile: all cards stack at natural content heights, visuals move beneath copy, reference radii/colors/padding are retained, and no horizontal overflow appears at 390px.
 
 - [ ] **Step 8: Run work, asset, lint, and type checks**
 

@@ -17,12 +17,39 @@ export interface PortfolioProject {
   image: string;
   imageAlt: string;
   proofPoints?: readonly [string, string];
-  metricSummary?: string;
+}
+
+export type PortfolioNavigationSurface = "desktop" | "mobile";
+export type PortfolioArea = "work";
+export type PortfolioSectionHrefPrefix = "" | "/";
+
+export type PortfolioNavigationItem =
+  | {
+      kind: "section";
+      label: "Work" | "About" | "Background";
+      href: `#${string}`;
+      surfaces: readonly PortfolioNavigationSurface[];
+    }
+  | {
+      kind: "external";
+      label: "Writing" | "Lab";
+      href: `https://${string}`;
+      surfaces: readonly PortfolioNavigationSurface[];
+    };
+
+export function resolvePortfolioNavigationHref(
+  item: PortfolioNavigationItem,
+  sectionHrefPrefix: PortfolioSectionHrefPrefix,
+): string {
+  return item.kind === "section"
+    ? `${sectionHrefPrefix}${item.href}`
+    : item.href;
 }
 
 export interface PortfolioData {
   identity: {
     name: "Tianzhe “Tyson” Hu";
+    shortName: "Tyson Hu";
     initials: "TH";
     role: "Software Engineer — Backend, Full-Stack & Developer Tooling";
     location: "New York, NY";
@@ -32,10 +59,14 @@ export interface PortfolioData {
     avatarUrl: string;
     description: string;
   };
-  navigation: readonly { label: "Work" | "About" | "Background"; href: string }[];
+  navigation: readonly PortfolioNavigationItem[];
   hero: {
+    eyebrow: "Backend · Full-Stack · Developer Tooling";
     headline: string;
     introduction: string;
+    primaryActionLabel: "Explore selected work";
+    secondaryActionLabel: "Contact";
+    serviceLabel: "Current service";
     service: string;
     servicePeriod: string;
   };
@@ -77,6 +108,7 @@ export interface PortfolioData {
 export const PORTFOLIO: PortfolioData = {
   identity: {
     name: "Tianzhe “Tyson” Hu",
+    shortName: "Tyson Hu",
     initials: "TH",
     role: "Software Engineer — Backend, Full-Stack & Developer Tooling",
     location: "New York, NY",
@@ -87,14 +119,44 @@ export const PORTFOLIO: PortfolioData = {
     description: "Software Engineer — Backend, Full-Stack & Developer Tooling",
   },
   navigation: [
-    { label: "Work", href: "#work" },
-    { label: "About", href: "#about" },
-    { label: "Background", href: "#background" },
+    {
+      kind: "section",
+      label: "Work",
+      href: "#work",
+      surfaces: ["desktop", "mobile"],
+    },
+    {
+      kind: "external",
+      label: "Writing",
+      href: "https://blog.tianzhe.me",
+      surfaces: ["desktop", "mobile"],
+    },
+    {
+      kind: "external",
+      label: "Lab",
+      href: "https://lab.tianzhe.me",
+      surfaces: ["desktop", "mobile"],
+    },
+    {
+      kind: "section",
+      label: "About",
+      href: "#about",
+      surfaces: ["desktop", "mobile"],
+    },
+    {
+      kind: "section",
+      label: "Background",
+      href: "#background",
+      surfaces: ["mobile"],
+    },
   ],
   hero: {
-    headline: "Reliable software, from product interfaces to system boundaries.",
-    introduction:
-      "I build reliable product and platform software with clear ownership, recoverable failure behavior, and evidence another engineer can inspect.",
+    eyebrow: "Backend · Full-Stack · Developer Tooling",
+    headline: "I build reliable product and platform software—from mobile interfaces to data boundaries.",
+    introduction: "Backend, full-stack, and developer-tooling work with explicit ownership, recoverable failure states, and evidence another engineer can inspect.",
+    primaryActionLabel: "Explore selected work",
+    secondaryActionLabel: "Contact",
+    serviceLabel: "Current service",
     service: "U.S. Army Reserve · Information Technology Specialist (25B)",
     servicePeriod: "January 2026–Present",
   },
@@ -162,10 +224,8 @@ export const PORTFOLIO: PortfolioData = {
         { label: "Live site", href: "https://study.tianzhe.me", external: true },
         { label: "GitHub", href: "https://github.com/tyson-hu/study-website", external: true },
       ],
-      image: "/networking-study-platform.png",
-      imageAlt: "Networking Study Platform interface showing study content and progress",
-      metricSummary:
-        "30 days ending Aug. 17, 2026: ≈1.8K visits / 4K page views; visits are not unique users.",
+      image: "/portfolio/networking-study-panel.webp",
+      imageAlt: "Stylized networking quiz panel with answer choices, timer, and progress",
     },
     {
       slug: "opencore",
@@ -173,7 +233,7 @@ export const PORTFOLIO: PortfolioData = {
       eyebrow: "Open source · Systems maintenance",
       title: "OpenCore for Razer Blade 15",
       description:
-        "Maintained OpenCore configuration and installation documentation for a Razer Blade 15 across multiple macOS releases.",
+        "Maintains an OpenCore configuration for the Razer Blade 15 across macOS releases, with compatibility work spanning ACPI, kexts, and hardware troubleshooting. The repository pairs that maintenance with installation guidance and release-specific documentation.",
       technologies: ["OpenCore", "ACPI", "Hardware debugging"],
       links: [
         {

@@ -8,7 +8,7 @@
 
 Redesign the existing recruiter-facing portfolio homepage to match the selected desktop and mobile visual references while preserving the development version's stronger, evidence-qualified content.
 
-The redesign must make Eazy Review the clear flagship, keep the Networking Study Platform prominent and metrically honest, retain OpenCore and BCI as evidence of systems breadth, and replace the current resume-template hierarchy with an editorial presentation of engineering judgment.
+The redesign must make Eazy Review the clear flagship, keep the Networking Study Platform prominent and evidence-grounded, retain OpenCore and BCI as evidence of systems breadth, and replace the current resume-template hierarchy with an editorial presentation of engineering judgment.
 
 ## Source of Truth
 
@@ -37,7 +37,7 @@ Excluded:
 - New application routes, backend services, persistence, analytics, or forms.
 - Food Scanner, because it is optional in the prose memo and absent from both selected visual references.
 - Git commit, push, pull request, Cloudflare deployment, production promotion, or production acceptance.
-- Refreshing the Aug. 17, 2026 study-platform metrics from an external system. The current figures remain evidence-qualified copy for this local redesign.
+- Study-platform traffic analytics on the homepage. The revised card uses evergreen product proof instead.
 
 ## Information Architecture
 
@@ -150,10 +150,8 @@ Supporting copy: lead with the systems that best demonstrate product judgment an
 - Variant: substantial live-product card.
 - Eyebrow: `Live product · Learning platform`.
 - Preserve the 404-question positioning and existing live-site and GitHub links.
-- Present `≈1.8K` as `30-day visits` and `≈4K` as `Page views`.
-- Include a small note: `Visits are not unique users.`
-- Retain the source period in supporting metadata: `30 days ending Aug. 17, 2026`.
-- Use the existing real study-platform screenshot as the product visual, cropped and positioned to match the selected reference without distorting it.
+- Omit traffic analytics and dated metric metadata; keep the product proof evergreen.
+- Use a purpose-built local editorial artwork showing a simplified networking quiz panel with answer choices, timer, and progress. The artwork must match the isolated product-render language used by Eazy Review and OpenCore, remain visibly illustrative rather than product-proof evidence, and preserve the live site and repository as the inspectable sources.
 
 #### OpenCore for Razer Blade 15
 
@@ -171,7 +169,7 @@ Supporting copy: lead with the systems that best demonstrate product judgment an
 - The project title or explicit link remains keyboard-accessible and leads to the existing GitHub repository.
 - Use a purpose-built local waveform visual matching the selected reference.
 
-Desktop uses a full-width flagship, an asymmetric two-card row for Networking and OpenCore, then a compact full-width BCI row. Mobile stacks all four presentations and moves project visuals below their copy.
+Desktop uses a full-width flagship, an asymmetric two-card row with equal-height Networking and OpenCore surfaces and bottom-aligned visuals, then a compact full-width BCI row. Mobile stacks all four presentations at their natural content heights and moves project visuals below their copy.
 
 ### Approach
 
@@ -238,7 +236,7 @@ Desktop uses a two-column footer composition. Mobile stacks the CTA and link row
 ## Data and Component Architecture
 
 - Keep `src/data/resume.tsx` as the factual source of truth, but reshape it into semantic groups for identity, principles, projects, background, capabilities, and contact.
-- Add explicit project presentation metadata such as variant, eyebrow, metrics, links, and visual asset path.
+- Add explicit project presentation metadata such as variant, eyebrow, proof points, links, and visual asset path.
 - Keep the homepage as a server-rendered composition wherever possible.
 - Add dedicated flagship, live-product, open-source, and compact embedded project presentation components. The redesigned homepage stops using the current generic `ProjectCard`, which remains available to existing consumers.
 - Prefer focused homepage section components over one monolithic page file.
@@ -263,7 +261,7 @@ Expected implementation surfaces:
 - Do not substitute CSS drawings, handcrafted SVGs, emoji, placeholder boxes, generic stock art, or text-symbol approximations for visible project imagery.
 - Use the existing icon library only for standard interface arrows and directional indicators.
 - Store new production assets locally under `public/portfolio/` with descriptive names.
-- Expected new asset names are `eazy-review-phone.webp`, `opencore-terminal.webp`, `bci-waveform.webp`, and `grid-texture.webp`; the study card continues using `networking-study-platform.png`.
+- Expected local asset names are `eazy-review-phone.webp`, `networking-study-panel.webp`, `opencore-terminal.webp`, `bci-waveform.webp`, and `grid-texture.webp`; the existing real study screenshot may remain for legacy surfaces but is not the homepage card artwork.
 - Every meaningful image receives accurate alternative text; decorative imagery uses empty alternative text.
 
 ## Interaction and Accessibility

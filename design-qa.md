@@ -1,10 +1,10 @@
-# Design QA — historical portfolio editorial redesign snapshot (`dfb7aad`)
+# Design QA — historical portfolio editorial redesign snapshot (`dfb7aad`) and bounded working-tree addendum
 
 ## Provenance and current validation
 
 This file records the accepted visual and design QA performed for commit `dfb7aad5ce30a5a891ac2bf42f6f07fc891df7b5`. The capture dimensions, browser observations, 51-check result, and `passed` disposition below apply only to that commit. They are retained as historical provenance, not as exact-head evidence for `e717cfe469379e58874b0ac70a62fea8987ddf68` or any later revision.
 
-All relative wording below—including “final,” “now,” “fresh,” “passed,” and “unresolved”—describes the `dfb7aad` snapshot and its then-current QA cycle. The `/tmp/...` and `/Users/...` capture paths document local inputs used for that cycle; they are not repository artifacts and are not guaranteed to remain available.
+Except inside the explicitly labeled 2026-08-19 post-snapshot addendum, all relative wording below—including “final,” “now,” “fresh,” “passed,” and “unresolved”—describes the `dfb7aad` snapshot and its then-current QA cycle. The `/tmp/...` and `/Users/...` capture paths document local inputs used for those cycles; they are not repository artifacts and are not guaranteed to remain available.
 
 The recruiter-audit and refinement series after `dfb7aad` changed the homepage hierarchy, the Eazy Review case-study shell, and the fixed-light theme-initializer contract. For the checked-out revision, the repository-local validation surfaces are:
 
@@ -13,7 +13,7 @@ The recruiter-audit and refinement series after `dfb7aad` changed the homepage h
 - Served-output fixed-light check: `pnpm check:theme-initializer -- <local-preview-url>` (`scripts/check-theme-initializer.mjs`).
 - Source and build checks: `pnpm lint`, `pnpm exec tsc --noEmit`, and `pnpm build`.
 
-Those commands and a fresh local rendered recruiter audit must be run and recorded against the exact revision under review. This historical file contains no browser capture, console, build, or exact-head acceptance claim for `e717cfe` or later.
+Those commands and a fresh local rendered recruiter audit must be run and recorded against the exact revision under review. The post-snapshot addendum records bounded local working-tree evidence only; it is not a commit, deployment, production, cross-browser, physical-device, or human-acceptance claim.
 
 ## Source and capture evidence for `dfb7aad`
 
@@ -96,7 +96,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 
 - P2: Desktop Approach wrapped to four lines and Background to three. Scoped desktop measures of 19ch and 21ch now produce the reference's three-line and two-line groupings. The normalized desktop capture is 1440 × 5852 versus 1440 × 5836.
 - P2: Mobile Work placed `clear` on the second line at 12ch; a measured 11ch width now renders exactly `Different project` / `types, with a` / `clear hierarchy.` without duplicating copy.
-- P2: The mobile Networking raster was forced through a 500px-tall `object-fit: cover` crop, leaving fragmented content. The approved real screenshot now uses `object-fit: contain`, centered inside the existing 500px browser frame, so the complete product state is coherent and undistorted while section rhythm stays aligned.
+- P2: The mobile Networking raster was forced through a 500px-tall `object-fit: cover` crop, leaving fragmented content. The approved real screenshot then used `object-fit: contain`, centered inside the existing 500px browser frame, so the complete product state was coherent and undistorted while section rhythm stayed aligned. This historical asset decision was superseded by the 2026-08-19 addendum.
 - P3 polish: the BCI linked title now has a resting underline and accent hover affordance.
 - `dfb7aad` Browser evidence: desktop Approach/Background line counts `3/2`; mobile Work line count `3`; study frame `500px` with `object-fit: contain`; zero horizontal overflow; all four images complete with non-zero natural dimensions; the fresh snapshot console had zero warnings and zero errors.
 
@@ -110,7 +110,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 ## Approved-content and asset decisions
 
 - The implementation intentionally preserves the approved evidence-qualified project summaries, metric source period, non-unique-visit note, technology lists, military role detail, and education wording. Their extra wrapping versus the visual reference is an approved content difference, not visual drift.
-- The study reference depicts a quiz-question panel, while the implementation uses the existing real `public/networking-study-platform.png` product screenshot. The approved spec explicitly requires that real asset. It is now centered and fully visible with `object-fit: contain` inside the reference-sized browser frame, without distortion. The remaining subject difference is therefore an approved real-content constraint, not an actionable P0–P2. A future replacement would require a newly approved real screenshot, not a fabricated reference mimic.
+- Historical `dfb7aad` decision, superseded by the 2026-08-19 addendum: the study reference depicted a quiz-question panel while the implementation used the existing real `public/networking-study-platform.png` product screenshot. That snapshot kept the screenshot centered and fully visible with `object-fit: contain` inside the reference-sized browser frame.
 
 ## Required fidelity surfaces recorded for `dfb7aad`
 
@@ -145,7 +145,7 @@ Each reference/implementation pair was generated at the same pixel width and cro
 
 ## P3 follow-ups
 
-- The approved real study screenshot cannot match the reference's quiz-question subject exactly. If a real quiz-state screenshot is later approved, it could improve subject fidelity without weakening evidence integrity.
+- Historical, superseded follow-up: the `dfb7aad` study screenshot did not match the reference's quiz-question subject. The 2026-08-19 addendum records the later approved illustrative-artwork correction.
 - Minor font rasterization and exact text wrapping differ from the static reference because the implementation uses the approved project fonts and longer evidence-qualified copy.
 
 ## Unresolved P0–P2 recorded for `dfb7aad`
@@ -153,3 +153,34 @@ Each reference/implementation pair was generated at the same pixel width and cro
 None were recorded for that snapshot.
 
 Historical QA result for commit `dfb7aad`: passed
+
+## Post-snapshot scoped correction — 2026-08-19 uncommitted working tree
+
+This addendum records only the two user-reported visual corrections in the local working tree based on `cdd1c94`: contact-headline punctuation crowding and the Networking Study Platform card artwork. The user directly approved a purpose-built illustrative study asset, superseding the historical real-screenshot constraint for this homepage card. The live site and repository remain the inspectable product proof.
+
+### Iteration 6 — punctuation and Networking artwork
+
+- Contact headline: `.contact-footer__intro h2` tracking changed from `-0.065em` to `-0.055em`. The 1440 × 1000 production-build capture shows the final period as a separate glyph to the right of the final `l`; an independent focused review found no remaining overlap.
+- Networking artwork: `public/portfolio/networking-study-panel.webp` replaces the literal full-page screenshot on the homepage card. It uses one isolated floating quiz panel, restrained periwinkle/cobalt light, soft shadow, and negative space to align with the Eazy Review and OpenCore product-render family. Alternative text describes the illustration rather than presenting it as product-proof evidence.
+- Responsive framing: desktop retains the shallow centered crop used by the paired project row. Below 768px, the study visual now uses its natural `3 / 2` ratio instead of the historical 500px screenshot frame. Browser measurements were 328 × 218.66 at 390px and 258 × 172 at 320px; both images completed with non-zero natural dimensions and centered `object-fit: contain` rendering.
+- Browser evidence: Codex In-app Browser against `http://127.0.0.1:3001/` served from a fresh Next.js production build; CSS viewport coverage was 1440 × 1000, 390 × 844, and 320 × 844. Each viewport had `scrollWidth === clientWidth`, no framework overlay, and the final tab reported zero console warnings or errors.
+- Interaction regression: activating `Back to top` returned the URL to `#top`, set `scrollY` to `0`, and focused `SPAN#top`.
+- Local captures: `/tmp/portfolio-after-work-desktop.png`, `/tmp/portfolio-after-work-390.png`, `/tmp/portfolio-after-work-320.png`, and `/tmp/portfolio-after-contact-desktop.png`.
+- Static regression coverage now requires the new artwork path and alternative text contract, rejects the legacy homepage screenshot path, locks centered study-image positioning, locks the mobile `3 / 2` frame, and locks the corrected footer tracking.
+- Remaining P3: the quiz subject necessarily contains more interface detail than the terminal and phone illustrations. Independent review found the treatment materially closer and acceptable across all three widths; further abstraction is optional, not a blocking defect.
+
+Working-tree QA result for the two bounded findings: passed. At the time of this local QA pass, no commit, push, review-state change, deployment, production verification, cross-browser pass, physical-device pass, or human acceptance was claimed. The later authorized dev-only deployment is recorded below.
+
+## Dev-only review deployment — 2026-08-19
+
+- Target boundary: Wrangler `env.dev` only, resolving to Worker `tianzhe-portfolio-dev` and its environment-suffixed `WORKER_SELF_REFERENCE`. Production Worker `tianzhe-portfolio` and its custom domain were not targeted.
+- Preflight: `pnpm check:portfolio -- all`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm exec opennextjs-cloudflare build --env dev`, and `pnpm exec wrangler deploy --dry-run --env dev` passed. The dry run named only `tianzhe-portfolio-dev`.
+- Deployment command: `pnpm exec opennextjs-cloudflare deploy --env dev`.
+- Deployed URL: `https://tianzhe-portfolio-dev.tyson-ec2.workers.dev`.
+- Deployed Worker version: `bda5f55d-fff7-450c-b744-04630a2e9cec`; `wrangler deployments list --env dev` confirmed it receives 100% of dev traffic.
+- HTTP verification: `/`, `/projects/eazy-review`, and `/portfolio/networking-study-panel.webp` each returned 200 without a redirect; the served fixed-light initializer check passed.
+- Browser verification: 1440 × 1000, 390 × 844, and 320 × 844 all matched `scrollWidth === clientWidth`, showed no framework overlay, and loaded the new Networking artwork with non-zero natural dimensions. Mobile retained the `3 / 2` artwork frame at both widths; the final dev tab produced no console warnings or errors.
+- Contact and navigation: the deployed 1440px capture shows the final `l.` as separate glyphs; `Back to top` returned to `#top`, `scrollY: 0`, and focus on `SPAN#top`.
+- Dev captures: `/tmp/portfolio-dev-deploy-desktop.png`, `/tmp/portfolio-dev-deploy-390.png`, and `/tmp/portfolio-dev-deploy-contact.png`.
+
+Dev-only deployment result: passed for review. No commit, push, production deployment, custom-domain verification, cross-browser pass, physical-device pass, or human acceptance is claimed.
