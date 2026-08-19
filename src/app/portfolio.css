@@ -791,6 +791,12 @@
   color: var(--portfolio-ink);
 }
 
+.project-card__links--hierarchical .project-card__link--primary:hover {
+  border-color: var(--portfolio-accent);
+  background: var(--portfolio-accent);
+  color: var(--portfolio-canvas);
+}
+
 .project-card__links--hierarchical .project-card__link--subordinate {
   color: var(--portfolio-muted);
   font-weight: 650;

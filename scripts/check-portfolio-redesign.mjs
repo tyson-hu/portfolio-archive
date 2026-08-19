@@ -191,6 +191,19 @@ const checks = {
     ["sticky anchor margin", contains("src/app/portfolio.css", "scroll-margin-top")],
     ["44px targets", contains("src/app/portfolio.css", "min-height: 44px")],
     [
+      "primary project link has contrasting hover treatment",
+      ruleContains(
+        "src/app/portfolio.css",
+        ".project-card__links--hierarchical .project-card__link--primary:hover",
+        "background: var(--portfolio-accent)",
+      ) &&
+        ruleContains(
+          "src/app/portfolio.css",
+          ".project-card__links--hierarchical .project-card__link--primary:hover",
+          "color: var(--portfolio-canvas)",
+        ),
+    ],
+    [
       "embedded title uses a measurable box",
       ruleContains("src/app/portfolio.css", ".project-card--embedded h3 a", "display: inline-flex"),
     ],
