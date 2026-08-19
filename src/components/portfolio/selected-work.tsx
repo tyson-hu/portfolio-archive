@@ -13,23 +13,41 @@ function ProjectEyebrow({ children }: { children: string }) {
   return <p className="project-card__eyebrow">{children}</p>;
 }
 
-function ProjectLinks({ links }: { links: readonly PortfolioLink[] }) {
+function ProjectLinks({ links, emphasizeFirst = false }: { links: readonly PortfolioLink[]; emphasizeFirst?: boolean }) {
   return (
-    <div className="project-card__links">
-      {links.map((link) =>
-        link.external ? (
-          <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
+    <div className={`project-card__links${emphasizeFirst ? " project-card__links--hierarchical" : ""}`}>
+      {links.map((link, index) => {
+        const className = emphasizeFirst
+          ? index === 0
+            ? "project-card__link project-card__link--primary"
+            : "project-card__link project-card__link--subordinate"
+          : "project-card__link";
+
+        return link.external ? (
+          <a className={className} key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
             {link.label}
             <ArrowUpRight aria-hidden="true" size={15} strokeWidth={2.25} />
           </a>
         ) : (
-          <Link key={link.href} href={link.href}>
+          <Link className={className} key={link.href} href={link.href}>
             {link.label}
             <ArrowUpRight aria-hidden="true" size={15} strokeWidth={2.25} />
           </Link>
-        ),
-      )}
+        );
+      })}
     </div>
+  );
+}
+
+function ProjectProof({ project }: ProjectCardProps) {
+  if (!project.proofPoints) return null;
+
+  return (
+    <ul className="project-card__proof-list">
+      {project.proofPoints.map((proofPoint) => (
+        <li key={proofPoint}>{proofPoint}</li>
+      ))}
+    </ul>
   );
 }
 
@@ -58,8 +76,9 @@ function FlagshipProject({ project }: ProjectCardProps) {
         <ProjectEyebrow>{project.eyebrow}</ProjectEyebrow>
         <h3>{project.title}</h3>
         <p className="project-card__description">{project.description}</p>
+        <ProjectProof project={project} />
         <p className="project-card__technologies">{project.technologies.join(" · ")}</p>
-        <ProjectLinks links={project.links} />
+        <ProjectLinks links={project.links} emphasizeFirst />
       </div>
       <div className="project-card__visual project-card__visual--phone">
         <ProjectImage project={project} sizes="(min-width: 768px) 42vw, 90vw" />
@@ -75,17 +94,10 @@ function StudyProject({ project }: ProjectCardProps) {
         <ProjectEyebrow>{project.eyebrow}</ProjectEyebrow>
         <h3>{project.title}</h3>
         <p className="project-card__description">{project.description}</p>
-        <dl className="project-card__metrics">
-          {project.metrics?.map((metric) => (
-            <div key={metric.label}>
-              <dt>{metric.label}</dt>
-              <dd>{metric.value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="project-card__metric-period">Source period · {project.metricPeriod}</p>
-        <p className="project-card__metric-note">{project.metricNote}</p>
-        <ProjectLinks links={project.links} />
+        <ProjectProof project={project} />
+        <p className="project-card__metric-summary">{project.metricSummary}</p>
+        <p className="project-card__technologies">{project.technologies.join(" · ")}</p>
+        <ProjectLinks links={project.links} emphasizeFirst />
       </div>
       <div className="project-card__visual project-card__visual--study">
         <ProjectImage project={project} sizes="(min-width: 768px) 46vw, 90vw" />
@@ -96,7 +108,7 @@ function StudyProject({ project }: ProjectCardProps) {
 
 function OpenCoreProject({ project }: ProjectCardProps) {
   return (
-    <article className="project-card project-card--opencore">
+    <article className="project-card project-card--opencore project-card--compact-opencore">
       <div className="project-card__copy">
         <ProjectEyebrow>{project.eyebrow}</ProjectEyebrow>
         <h3>{project.title}</h3>
@@ -115,7 +127,7 @@ function EmbeddedProject({ project }: ProjectCardProps) {
   const projectLink = project.links[0];
 
   return (
-    <article className="project-card project-card--embedded">
+    <article className="project-card project-card--embedded project-card--secondary-bci">
       <div className="project-card__copy">
         <ProjectEyebrow>{project.eyebrow}</ProjectEyebrow>
         <h3>

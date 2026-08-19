@@ -36,7 +36,7 @@ export function ContactFooter() {
         <p>
           {identity.name} · {identity.role}
         </p>
-        <p>{contact.conceptDate}</p>
+        <p>{identity.location}</p>
       </div>
     </footer>
   );

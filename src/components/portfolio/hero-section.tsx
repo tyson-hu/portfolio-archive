@@ -3,16 +3,19 @@ import { ArrowDown, ArrowUpRight, Circle } from "lucide-react";
 import { PORTFOLIO } from "@/data/portfolio";
 
 export function HeroSection() {
-  const { hero, priorities, contact } = PORTFOLIO;
-  const [serviceName, serviceDetail] = hero.service.split(" · ");
+  const { hero, identity, contact } = PORTFOLIO;
 
   return (
     <section className="hero-section" aria-labelledby="hero-title">
       <div className="hero-section__content">
         <p className="hero-section__eyebrow">
           <Circle className="hero-section__eyebrow-dot" aria-hidden="true" fill="currentColor" strokeWidth={0} />
-          {hero.eyebrow}
+          {identity.portfolioLabel} · {identity.location}
         </p>
+        <div className="hero-section__identity">
+          <p className="hero-section__name">{identity.name}</p>
+          <p className="hero-section__role">{identity.role}</p>
+        </div>
         <h1 id="hero-title">
           Reliable<span className="hero-section__mobile-break"><br /></span> software,
           <span className="hero-section__mobile-break"><br /></span> from product
@@ -38,28 +41,10 @@ export function HeroSection() {
         </div>
         <p className="hero-section__service">
           <Circle className="hero-section__service-dot" aria-hidden="true" fill="currentColor" strokeWidth={0} />
-          <strong>{serviceName}</strong>
-          {serviceDetail ? <span> · {serviceDetail}</span> : null}
+          <strong>{hero.service}</strong>
+          <span> · {hero.servicePeriod}</span>
         </p>
       </div>
-
-      <aside className="engineering-priorities" aria-labelledby="engineering-priorities-title">
-        <div className="engineering-priorities__heading">
-          <h2 id="engineering-priorities-title">Engineering priorities</h2>
-          <Circle className="engineering-priorities__status" aria-hidden="true" fill="currentColor" strokeWidth={0} />
-        </div>
-        <ol className="engineering-priorities__list">
-          {priorities.map((priority) => (
-            <li key={priority.number} className="engineering-priorities__item">
-              <span className="engineering-priorities__number">{priority.number}</span>
-              <div>
-                <h3>{priority.title}</h3>
-                <p>{priority.description}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </aside>
     </section>
   );
 }
