@@ -13,6 +13,8 @@ const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const ruleContains = (path, selector, declaration) =>
   new RegExp(`${escapeRegExp(selector)}\\s*\\{[^}]*${escapeRegExp(declaration)}`, "s").test(read(path));
 const allContain = (path, values) => values.every((value) => contains(path, value));
+const normalizedContains = (path, value) =>
+  read(path).replace(/\s+/g, " ").includes(value);
 const activeHomepageFiles = [
   "src/app/page.tsx",
   "src/components/portfolio/site-header.tsx",
@@ -182,6 +184,85 @@ const checks = {
       "desktop hero density reduced",
       excludes("src/app/portfolio.css", "min-height: 1020px") &&
         ruleContains("src/app/portfolio.css", ".hero-section", "min-height: 720px"),
+    ],
+  ],
+  caseStudy: [
+    [
+      "case study shared shell",
+      allContain("src/app/projects/eazy-review/page.tsx", [
+        'import { SiteHeader } from "@/components/portfolio/site-header"',
+        'import { ContactFooter } from "@/components/portfolio/contact-footer"',
+        '<SiteHeader sectionHrefPrefix="/" />',
+        "<ContactFooter compact />",
+      ]),
+    ],
+    [
+      "case study shell and reading column hooks",
+      allContain("src/app/projects/eazy-review/page.tsx", [
+        "portfolio-page case-study-page",
+        "case-study-shell",
+        "case-study-reading-column",
+      ]) &&
+        allContain("src/app/portfolio.css", [".case-study-shell", ".case-study-reading-column"]),
+    ],
+    [
+      "case study orientation label",
+      contains("src/app/projects/eazy-review/page.tsx", "Independent Engineering Case Study"),
+    ],
+    [
+      "case study proof labels",
+      allContain("src/app/projects/eazy-review/page.tsx", [
+        'label: "Security"',
+        'label: "Verification"',
+        'label: "Reliability"',
+      ]),
+    ],
+    [
+      "case study primary and verification CTAs",
+      allContain("src/app/projects/eazy-review/page.tsx", [
+        "GitHub repository",
+        'href="#verification"',
+        "How I verified it",
+      ]),
+    ],
+    [
+      "nested header homepage anchors",
+      allContain("src/components/portfolio/site-header.tsx", [
+        "sectionHrefPrefix",
+        "${sectionHrefPrefix}${item.href}",
+      ]) &&
+        contains("src/app/projects/eazy-review/page.tsx", '<SiteHeader sectionHrefPrefix="/" />'),
+    ],
+    [
+      "plain-English case study evidence labels",
+      allContain("src/app/projects/eazy-review/page.tsx", [
+        "Catalog and reconnect evidence",
+        "Auth and session evidence",
+        "Rating persistence evidence",
+        "Password recovery evidence",
+      ]) &&
+        ["Task 15 result", "Task 16 result", "Task 17 result", "Task 18 result"].every((label) =>
+          excludes("src/app/projects/eazy-review/page.tsx", label),
+        ),
+    ],
+    [
+      "case study decision titles and limitation",
+      allContain("src/app/projects/eazy-review/page.tsx", [
+        "Keep ownership at the data boundary",
+        "Keep aggregate score truth server-owned",
+        "Model failure as product behavior",
+      ]) &&
+        normalizedContains(
+          "src/app/projects/eazy-review/page.tsx",
+          "This case study makes no claim about production users, traffic, scale, uptime, or a store launch.",
+        ),
+    ],
+    [
+      "case study avoids generic Badge and Button",
+      excludes("src/app/projects/eazy-review/page.tsx", "@/components/ui/badge") &&
+        excludes("src/app/projects/eazy-review/page.tsx", "@/components/ui/button") &&
+        excludes("src/app/projects/eazy-review/page.tsx", "<Badge") &&
+        excludes("src/app/projects/eazy-review/page.tsx", "<Button"),
     ],
   ],
   styles: [

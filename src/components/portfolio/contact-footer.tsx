@@ -2,11 +2,19 @@ import { ArrowUp, ArrowUpRight } from "lucide-react";
 
 import { PORTFOLIO } from "@/data/portfolio";
 
-export function ContactFooter() {
+type ContactFooterProps = {
+  compact?: boolean;
+};
+
+export function ContactFooter({ compact = false }: ContactFooterProps) {
   const { contact, identity } = PORTFOLIO;
 
   return (
-    <footer id="contact" className="contact-footer" aria-labelledby="contact-title">
+    <footer
+      id="contact"
+      className={`contact-footer${compact ? " contact-footer--compact" : ""}`}
+      aria-labelledby="contact-title"
+    >
       <div className="contact-footer__inner">
         <div className="contact-footer__intro">
           <p className="contact-footer__rail">{contact.label}</p>

@@ -2,7 +2,11 @@ import Link from "next/link";
 
 import { PORTFOLIO } from "@/data/portfolio";
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+  sectionHrefPrefix?: "" | "/";
+};
+
+export function SiteHeader({ sectionHrefPrefix = "" }: SiteHeaderProps) {
   const { identity, navigation, contact } = PORTFOLIO;
 
   return (
@@ -17,7 +21,7 @@ export function SiteHeader() {
         </Link>
         <nav className="portfolio-header__nav" aria-label="Primary navigation">
           {navigation.map((item) => (
-            <a key={item.href} href={item.href}>
+            <a key={item.href} href={`${sectionHrefPrefix}${item.href}`}>
               {item.label}
             </a>
           ))}
