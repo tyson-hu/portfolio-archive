@@ -73,6 +73,15 @@ const checks = {
   ],
   shell: [
     ["exact metadata title", contains("src/app/layout.tsx", "Tianzhe Hu — Software Engineer")],
+    [
+      "fixed-light served checker contract",
+      allContain("scripts/check-theme-initializer.mjs", [
+        "Expected <html> root",
+        "Expected zero active inline theme initializers",
+        "Fixed-light shell PASS",
+        "__name",
+      ]) && excludes("scripts/check-theme-initializer.mjs", "Expected exactly one inline theme initializer"),
+    ],
     ["root has no dock", excludes("src/app/layout.tsx", "<Navbar")],
     ["root has no animated grid", excludes("src/app/layout.tsx", "FlickeringGrid")],
     ["case study owns its container", contains("src/app/projects/eazy-review/page.tsx", "case-study-page")],

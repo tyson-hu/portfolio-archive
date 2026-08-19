@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import vm from "node:vm";
 
 const targetUrl = process.argv[2] ?? "http://127.0.0.1:8787/";
 const response = await fetch(targetUrl);
@@ -7,75 +6,33 @@ const response = await fetch(targetUrl);
 assert.equal(
   response.ok,
   true,
-  `Expected ${targetUrl} to return a successful response, received ${response.status}`
+  `Expected ${targetUrl} to return a successful response, received ${response.status}`,
 );
 
 const html = await response.text();
-const inlineScripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(
-  (match) => match[1]
+const rootHtmlTag = html.match(/<html\b[^>]*>/i)?.[0];
+
+assert.ok(rootHtmlTag, `Expected <html> root in served HTML from ${targetUrl}`);
+assert.match(
+  rootHtmlTag,
+  /\bclass=(?:"[^"]*\blight\b[^"]*"|'[^']*\blight\b[^']*'|light\b)/i,
+  `Expected <html> root in ${targetUrl} to include the light class`,
 );
-const themeScripts = inlineScripts.filter(
-  (script) =>
-    !script.startsWith("self.__next_f.push") &&
-    script.includes("document.documentElement") &&
-    script.includes("localStorage")
-);
+assert.doesNotMatch(html, /\b__name\s*\(/, `Served HTML from ${targetUrl} must not reference __name(...)`);
+
+const inlineScripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
+const activeThemeInitializers = inlineScripts.filter((script) => {
+  const activeScript = !script.trimStart().startsWith("self.__next_f.push");
+  const mutatesRoot = /document\.documentElement\b/.test(script);
+  const readsThemePreference = /\blocalStorage\b|\bmatchMedia\b/.test(script);
+
+  return activeScript && mutatesRoot && readsThemePreference;
+});
 
 assert.equal(
-  themeScripts.length,
-  1,
-  `Expected exactly one inline theme initializer in ${targetUrl}, found ${themeScripts.length}`
+  activeThemeInitializers.length,
+  0,
+  `Expected zero active inline theme initializers in ${targetUrl}, found ${activeThemeInitializers.length}`,
 );
 
-const themeInitializer = themeScripts[0];
-
-assert.doesNotMatch(
-  themeInitializer,
-  /\b__name\s*\(/,
-  "Theme initializer must not reference the bundler-generated __name helper"
-);
-
-function executeInitializer(storedTheme, prefersDark) {
-  const classes = new Set();
-  const attributes = new Map();
-  const documentElement = {
-    classList: {
-      add: (...names) => names.forEach((name) => classes.add(name)),
-      remove: (...names) => names.forEach((name) => classes.delete(name)),
-    },
-    setAttribute: (name, value) => attributes.set(name, value),
-    style: {},
-  };
-
-  const context = {
-    document: { documentElement },
-    localStorage: {
-      getItem: (key) => (key === "theme" ? storedTheme : null),
-    },
-    window: {
-      matchMedia: () => ({ matches: prefersDark }),
-    },
-  };
-
-  vm.runInNewContext(themeInitializer, context, {
-    filename: "served-theme-initializer.js",
-    timeout: 1_000,
-  });
-
-  return { attributes, classes, colorScheme: documentElement.style.colorScheme };
-}
-
-for (const scenario of [
-  { storedTheme: null, prefersDark: true, expected: "light" },
-  { storedTheme: "light", prefersDark: true, expected: "light" },
-  { storedTheme: "dark", prefersDark: false, expected: "dark" },
-  { storedTheme: "system", prefersDark: false, expected: "light" },
-  { storedTheme: "system", prefersDark: true, expected: "dark" },
-]) {
-  const result = executeInitializer(scenario.storedTheme, scenario.prefersDark);
-
-  assert.equal(result.classes.has(scenario.expected), true);
-  assert.equal(result.colorScheme, scenario.expected);
-}
-
-console.log(`Theme initializer PASS: ${targetUrl}`);
+console.log(`Fixed-light shell PASS: ${targetUrl}`);
